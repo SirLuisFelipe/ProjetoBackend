@@ -1,0 +1,48 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+    <changeSet id="1" author="luis_felipe">
+        <createTable tableName="users">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="cpf" type="varchar(100)"/>
+            <column name="name" type="varchar(100)"/>
+            <column name="email" type="varchar(100)"/>
+            <column name="encoded_password" type="varchar(100)"/>
+            <column name="role" type="varchar(100)"/>
+        </createTable>
+        <createTable tableName="track">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(100)"/>
+        </createTable>
+        <createTable tableName="payment">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(100)"/>
+        </createTable>
+        <createTable tableName="scheduling">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="bigint">
+                <constraints foreignKeyName="fk_users_scheduling"/>
+            </column>
+            <column name="track_id" type="bigint">
+                <constraints foreignKeyName="fk_track_scheduling"/>
+            </column>
+            <column name="payment_id" type="bigint">
+                <constraints foreignKeyName="fk_payment_scheduling"/>
+            </column>
+            <column name="scheduled_time_start" type="TIMESTAMP"/>
+            <column name="scheduled_time_end" type="TIMESTAMP"/>
+            <column name="payment_value" type="DOUBLE PRECISION"/>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

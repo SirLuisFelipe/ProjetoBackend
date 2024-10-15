@@ -1,6 +1,6 @@
 package com.projeto.demo.services;
 
-import com.projeto.demo.models.Scheduling;
+import com.projeto.demo.entities.Scheduling;
 import com.projeto.demo.repositories.SchedulingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -39,10 +39,10 @@ public class SchedulingService {
 
     //  Busca todos agendamentos de um usuario
     public List<Scheduling> getSchedulingsByUserId(Long userId) {
-        return schedulingRepository.findByUser_Id(userId);
+        return schedulingRepository.findByUserId(userId);
     }
     //  Buscar todos agendamentos por tipo de pista
     public List<Scheduling> getSchedulingsByTrackid(Integer trackid){
-        return schedulingRepository.findByTrackid(trackid);
+        return schedulingRepository.findByTrackId(trackid);
     }
 }

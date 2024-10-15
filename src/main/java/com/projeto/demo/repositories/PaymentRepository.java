@@ -1,6 +1,6 @@
 package com.projeto.demo.repositories;
 
-import com.projeto.demo.models.Payment;
+import com.projeto.demo.entities.Payment;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

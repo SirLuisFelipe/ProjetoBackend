@@ -1,50 +1,73 @@
 package com.projeto.demo.controllers;
 
-import com.projeto.demo.models.User;
+import com.projeto.demo.dto.UserRegisterDto;
 import com.projeto.demo.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
-
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/user")
 public class UserController {
 
     @Autowired
-    public UserController(final UserService service) { this.service = service; }
+    private UserService userService;
 
-    private final UserService service;
-
-    @PostMapping
-    public ResponseEntity<Object> create(@RequestBody User users) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(users));
+    @PostMapping("/")
+    public ResponseEntity<?> create(@RequestBody UserRegisterDto userDto) {
+        try {
+            return ResponseEntity.ok(userService.register(userDto));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
     }
 
-    @PutMapping
-    public ResponseEntity<Object> update (@RequestBody User users) {return ResponseEntity.ok(service.update(users));}
+    @PutMapping("/")
+    public ResponseEntity<?> update(@RequestBody UserRegisterDto userDto) {
+        try {
+            return ResponseEntity.ok(userService.update(userDto));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
 
     @GetMapping("/{cpf}")
-    public ResponseEntity<Optional<User>> getEmail(@PathVariable String cpf){
-        return ResponseEntity.ok(service.getByCpf(cpf));
+    public ResponseEntity<?> getEmail(@PathVariable String cpf) {
+        try {
+            return ResponseEntity.ok(userService.findByCpf(cpf));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
     }
 
     @GetMapping
-    public List<User> list() { return service.list(); }
-
-    @GetMapping("/{page}/{size}")
-    public Page<User> listPage(@PathVariable Integer page,
-                               @PathVariable Integer size) {
-        return service.listPage(page, size);
+    public ResponseEntity<?> list() {
+        try {
+            return ResponseEntity.ok(userService.listUsers());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
     }
-    @DeleteMapping("/{cpf}")
-    public ResponseEntity<Object> deleteUser(@PathVariable String cpf){
-        service.deleteByCpf(cpf);
-        return ResponseEntity.noContent().build();
+
+    @DeleteMapping("/cpf/{cpf}")
+    public ResponseEntity<Object> deleteUser(@PathVariable String cpf) {
+        try {
+            userService.deleteByCpf(cpf);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/id/{id}")
+    public ResponseEntity<Object> deleteUser(@PathVariable Long id) {
+        try {
+            userService.deleteById(id);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
     }
 
 }
