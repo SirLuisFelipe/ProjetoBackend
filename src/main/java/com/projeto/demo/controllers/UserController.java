@@ -1,7 +1,6 @@
 package com.projeto.demo.controllers;
 
 import com.projeto.demo.dto.UserRegisterDto;
-import com.projeto.demo.entities.User;
 import com.projeto.demo.exceptions.UnauthorizedActionException;
 import com.projeto.demo.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
