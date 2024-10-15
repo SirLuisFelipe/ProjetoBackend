@@ -1,0 +1,934 @@
+{
+	"info": {
+		"_postman_id": "a6cd39fe-263d-4eda-8cca-648751f47576",
+		"name": "TCC Lipe",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "18092805"
+	},
+	"item": [
+		{
+			"name": "User",
+			"item": [
+				{
+					"name": "Register",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"cpf\": \"12345678902\",\r\n    \"name\": \"John Doe\",\r\n    \"email\": \"john@doe.com\",\r\n    \"password\": \"john123\",\r\n    \"role\": \"ADMIN\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/reservation/auth/register",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"reservation",
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"johndoe@doejhon.com\",\r\n    \"password\": \"john123\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/reservation/auth/login",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"reservation",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update user",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJqb2huZG9lQGRvZWpob24uY29tIiwicm9sZSI6bnVsbCwiY3BmIjpudWxsLCJpZCI6MSwiZXhwIjoxNzI5NjMzNDczLCJpYXQiOjE3MjkwMjg2NzMsImVtYWlsIjoiam9obmRvZUBkb2VqaG9uLmNvbSJ9.nKIQlRpMizfRjHl5ly4Vrlv8s1X4hU_gH-USNEBeh2vpkQsmlLpT1DiME5zWgplYgg6rDP8ibKz5pPbJkqrTVg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": 1,\r\n    \"name\": \"john doe\",\r\n    \"email\": \"johndoe@doejhon.com\",\r\n    \"password\": \"john123\",\r\n    \"cpf\": \"09343317905\",\r\n    \"role\": \"ADMIN\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/reservation/user/",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"reservation",
+								"user",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Find user by CPF",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJqb2huZG9lQGRvZWpob24uY29tIiwicm9sZSI6bnVsbCwiY3BmIjpudWxsLCJpZCI6MSwiZXhwIjoxNzI5NjMzNDczLCJpYXQiOjE3MjkwMjg2NzMsImVtYWlsIjoiam9obmRvZUBkb2VqaG9uLmNvbSJ9.nKIQlRpMizfRjHl5ly4Vrlv8s1X4hU_gH-USNEBeh2vpkQsmlLpT1DiME5zWgplYgg6rDP8ibKz5pPbJkqrTVg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/reservation/user/cpf/09343317905",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"reservation",
+								"user",
+								"cpf",
+								"09343317905"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List users",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJqb2huZG9lQGRvZWpob24uY29tIiwicm9sZSI6bnVsbCwiY3BmIjpudWxsLCJpZCI6MSwiZXhwIjoxNzI5NjMzNDczLCJpYXQiOjE3MjkwMjg2NzMsImVtYWlsIjoiam9obmRvZUBkb2VqaG9uLmNvbSJ9.nKIQlRpMizfRjHl5ly4Vrlv8s1X4hU_gH-USNEBeh2vpkQsmlLpT1DiME5zWgplYgg6rDP8ibKz5pPbJkqrTVg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:8080/reservation/user/",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"reservation",
+								"user",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Find user by id",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJqb2huZG9lQGRvZWpob24uY29tIiwicm9sZSI6bnVsbCwiY3BmIjpudWxsLCJpZCI6MSwiZXhwIjoxNzI5NjMzNDczLCJpYXQiOjE3MjkwMjg2NzMsImVtYWlsIjoiam9obmRvZUBkb2VqaG9uLmNvbSJ9.nKIQlRpMizfRjHl5ly4Vrlv8s1X4hU_gH-USNEBeh2vpkQsmlLpT1DiME5zWgplYgg6rDP8ibKz5pPbJkqrTVg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/reservation/user/id/1",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"reservation",
+								"user",
+								"id",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete user by CPF",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJqb2huZG9lQGRvZWpob24uY29tIiwicm9sZSI6bnVsbCwiY3BmIjpudWxsLCJpZCI6MSwiZXhwIjoxNzI5NjMzNDczLCJpYXQiOjE3MjkwMjg2NzMsImVtYWlsIjoiam9obmRvZUBkb2VqaG9uLmNvbSJ9.nKIQlRpMizfRjHl5ly4Vrlv8s1X4hU_gH-USNEBeh2vpkQsmlLpT1DiME5zWgplYgg6rDP8ibKz5pPbJkqrTVg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/reservation/user/cpf/09343317905",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"reservation",
+								"user",
+								"cpf",
+								"09343317905"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete user by id",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJqb2huZG9lQGRvZWpob24uY29tIiwicm9sZSI6bnVsbCwiY3BmIjpudWxsLCJpZCI6MSwiZXhwIjoxNzI5NjMzNDczLCJpYXQiOjE3MjkwMjg2NzMsImVtYWlsIjoiam9obmRvZUBkb2VqaG9uLmNvbSJ9.nKIQlRpMizfRjHl5ly4Vrlv8s1X4hU_gH-USNEBeh2vpkQsmlLpT1DiME5zWgplYgg6rDP8ibKz5pPbJkqrTVg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/reservation/user/id/1",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"reservation",
+								"user",
+								"id",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Track",
+			"item": [
+				{
+					"name": "Create track",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJqb2huZG9lQGRvZWpob24uY29tIiwicm9sZSI6bnVsbCwiY3BmIjpudWxsLCJpZCI6MSwiZXhwIjoxNzI5NjMzNDczLCJpYXQiOjE3MjkwMjg2NzMsImVtYWlsIjoiam9obmRvZUBkb2VqaG9uLmNvbSJ9.nKIQlRpMizfRjHl5ly4Vrlv8s1X4hU_gH-USNEBeh2vpkQsmlLpT1DiME5zWgplYgg6rDP8ibKz5pPbJkqrTVg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "track1",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/reservation/track/",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"reservation",
+								"track",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Find track by id",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJqb2huZG9lQGRvZWpob24uY29tIiwicm9sZSI6bnVsbCwiY3BmIjpudWxsLCJpZCI6MSwiZXhwIjoxNzI5NjMzNDczLCJpYXQiOjE3MjkwMjg2NzMsImVtYWlsIjoiam9obmRvZUBkb2VqaG9uLmNvbSJ9.nKIQlRpMizfRjHl5ly4Vrlv8s1X4hU_gH-USNEBeh2vpkQsmlLpT1DiME5zWgplYgg6rDP8ibKz5pPbJkqrTVg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/reservation/track/1",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"reservation",
+								"track",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List tracks",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJqb2huZG9lQGRvZWpob24uY29tIiwicm9sZSI6bnVsbCwiY3BmIjpudWxsLCJpZCI6MSwiZXhwIjoxNzI5NjMzNDczLCJpYXQiOjE3MjkwMjg2NzMsImVtYWlsIjoiam9obmRvZUBkb2VqaG9uLmNvbSJ9.nKIQlRpMizfRjHl5ly4Vrlv8s1X4hU_gH-USNEBeh2vpkQsmlLpT1DiME5zWgplYgg6rDP8ibKz5pPbJkqrTVg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/reservation/track/",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"reservation",
+								"track",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete track by id",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJqb2huZG9lQGRvZWpob24uY29tIiwicm9sZSI6bnVsbCwiY3BmIjpudWxsLCJpZCI6MSwiZXhwIjoxNzI5NjMzNDczLCJpYXQiOjE3MjkwMjg2NzMsImVtYWlsIjoiam9obmRvZUBkb2VqaG9uLmNvbSJ9.nKIQlRpMizfRjHl5ly4Vrlv8s1X4hU_gH-USNEBeh2vpkQsmlLpT1DiME5zWgplYgg6rDP8ibKz5pPbJkqrTVg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/reservation/track/1",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"reservation",
+								"track",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Payment",
+			"item": [
+				{
+					"name": "Create payment",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJqb2huZG9lQGRvZWpob24uY29tIiwicm9sZSI6bnVsbCwiY3BmIjpudWxsLCJpZCI6MSwiZXhwIjoxNzI5NjMzNDczLCJpYXQiOjE3MjkwMjg2NzMsImVtYWlsIjoiam9obmRvZUBkb2VqaG9uLmNvbSJ9.nKIQlRpMizfRjHl5ly4Vrlv8s1X4hU_gH-USNEBeh2vpkQsmlLpT1DiME5zWgplYgg6rDP8ibKz5pPbJkqrTVg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "payment1",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/reservation/payment/",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"reservation",
+								"payment",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Find payment by id",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJqb2huZG9lQGRvZWpob24uY29tIiwicm9sZSI6bnVsbCwiY3BmIjpudWxsLCJpZCI6MSwiZXhwIjoxNzI5NjMzNDczLCJpYXQiOjE3MjkwMjg2NzMsImVtYWlsIjoiam9obmRvZUBkb2VqaG9uLmNvbSJ9.nKIQlRpMizfRjHl5ly4Vrlv8s1X4hU_gH-USNEBeh2vpkQsmlLpT1DiME5zWgplYgg6rDP8ibKz5pPbJkqrTVg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/reservation/payment/1",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"reservation",
+								"payment",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List payments",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJqb2huZG9lQGRvZWpob24uY29tIiwicm9sZSI6bnVsbCwiY3BmIjpudWxsLCJpZCI6MSwiZXhwIjoxNzI5NjMzNDczLCJpYXQiOjE3MjkwMjg2NzMsImVtYWlsIjoiam9obmRvZUBkb2VqaG9uLmNvbSJ9.nKIQlRpMizfRjHl5ly4Vrlv8s1X4hU_gH-USNEBeh2vpkQsmlLpT1DiME5zWgplYgg6rDP8ibKz5pPbJkqrTVg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/reservation/payment/",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"reservation",
+								"payment",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete payment by id",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJqb2huZG9lQGRvZWpob24uY29tIiwicm9sZSI6bnVsbCwiY3BmIjpudWxsLCJpZCI6MSwiZXhwIjoxNzI5NjMzNDczLCJpYXQiOjE3MjkwMjg2NzMsImVtYWlsIjoiam9obmRvZUBkb2VqaG9uLmNvbSJ9.nKIQlRpMizfRjHl5ly4Vrlv8s1X4hU_gH-USNEBeh2vpkQsmlLpT1DiME5zWgplYgg6rDP8ibKz5pPbJkqrTVg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/reservation/payment/3",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"reservation",
+								"payment",
+								"3"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Scheduling",
+			"item": [
+				{
+					"name": "Create scheduling",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJqb2huZG9lQGRvZWpob24uY29tIiwicm9sZSI6bnVsbCwiY3BmIjpudWxsLCJpZCI6MSwiZXhwIjoxNzI5NjMzNDczLCJpYXQiOjE3MjkwMjg2NzMsImVtYWlsIjoiam9obmRvZUBkb2VqaG9uLmNvbSJ9.nKIQlRpMizfRjHl5ly4Vrlv8s1X4hU_gH-USNEBeh2vpkQsmlLpT1DiME5zWgplYgg6rDP8ibKz5pPbJkqrTVg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"userId\": 1,\r\n    \"trackId\": 2,\r\n    \"paymentId\": 2,\r\n    \"scheduledTimeStart\": \"2024-10-15T15:30:00\",\r\n    \"scheduledTimeEnd\": \"2024-10-15T17:00:00\",\r\n    \"paymentValue\": 70.25\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/reservation/scheduling/",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"reservation",
+								"scheduling",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update scheduling",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJqb2huZG9lQGRvZWpob24uY29tIiwicm9sZSI6bnVsbCwiY3BmIjpudWxsLCJpZCI6MSwiZXhwIjoxNzI5NjMzNDczLCJpYXQiOjE3MjkwMjg2NzMsImVtYWlsIjoiam9obmRvZUBkb2VqaG9uLmNvbSJ9.nKIQlRpMizfRjHl5ly4Vrlv8s1X4hU_gH-USNEBeh2vpkQsmlLpT1DiME5zWgplYgg6rDP8ibKz5pPbJkqrTVg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": 1,\r\n    \"userId\": 1,\r\n    \"trackId\": 2,\r\n    \"paymentId\": 2,\r\n    \"scheduledTimeStart\": \"2024-10-15T15:30:00\",\r\n    \"scheduledTimeEnd\": \"2024-10-15T17:00:00\",\r\n    \"paymentValue\": 100.99\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/reservation/scheduling/",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"reservation",
+								"scheduling",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Find scheduling by id",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJqb2huZG9lQGRvZWpob24uY29tIiwicm9sZSI6bnVsbCwiY3BmIjpudWxsLCJpZCI6MSwiZXhwIjoxNzI5NjMzNDczLCJpYXQiOjE3MjkwMjg2NzMsImVtYWlsIjoiam9obmRvZUBkb2VqaG9uLmNvbSJ9.nKIQlRpMizfRjHl5ly4Vrlv8s1X4hU_gH-USNEBeh2vpkQsmlLpT1DiME5zWgplYgg6rDP8ibKz5pPbJkqrTVg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/reservation/scheduling/1",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"reservation",
+								"scheduling",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List schedulings",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJqb2huZG9lQGRvZWpob24uY29tIiwicm9sZSI6bnVsbCwiY3BmIjpudWxsLCJpZCI6MSwiZXhwIjoxNzI5NjMzNDczLCJpYXQiOjE3MjkwMjg2NzMsImVtYWlsIjoiam9obmRvZUBkb2VqaG9uLmNvbSJ9.nKIQlRpMizfRjHl5ly4Vrlv8s1X4hU_gH-USNEBeh2vpkQsmlLpT1DiME5zWgplYgg6rDP8ibKz5pPbJkqrTVg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/reservation/scheduling/",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"reservation",
+								"scheduling",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List schedulings by userId",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJqb2huZG9lQGRvZWpob24uY29tIiwicm9sZSI6bnVsbCwiY3BmIjpudWxsLCJpZCI6MSwiZXhwIjoxNzI5NjMzNDczLCJpYXQiOjE3MjkwMjg2NzMsImVtYWlsIjoiam9obmRvZUBkb2VqaG9uLmNvbSJ9.nKIQlRpMizfRjHl5ly4Vrlv8s1X4hU_gH-USNEBeh2vpkQsmlLpT1DiME5zWgplYgg6rDP8ibKz5pPbJkqrTVg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/reservation/scheduling/user/1",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"reservation",
+								"scheduling",
+								"user",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List schedulings by trackId",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJqb2huZG9lQGRvZWpob24uY29tIiwicm9sZSI6bnVsbCwiY3BmIjpudWxsLCJpZCI6MSwiZXhwIjoxNzI5NjMzNDczLCJpYXQiOjE3MjkwMjg2NzMsImVtYWlsIjoiam9obmRvZUBkb2VqaG9uLmNvbSJ9.nKIQlRpMizfRjHl5ly4Vrlv8s1X4hU_gH-USNEBeh2vpkQsmlLpT1DiME5zWgplYgg6rDP8ibKz5pPbJkqrTVg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/reservation/scheduling/track/1",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"reservation",
+								"scheduling",
+								"track",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete scheduling by id",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJqb2huZG9lQGRvZWpob24uY29tIiwicm9sZSI6bnVsbCwiY3BmIjpudWxsLCJpZCI6MSwiZXhwIjoxNzI5NjMzNDczLCJpYXQiOjE3MjkwMjg2NzMsImVtYWlsIjoiam9obmRvZUBkb2VqaG9uLmNvbSJ9.nKIQlRpMizfRjHl5ly4Vrlv8s1X4hU_gH-USNEBeh2vpkQsmlLpT1DiME5zWgplYgg6rDP8ibKz5pPbJkqrTVg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/reservation/scheduling/1",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"reservation",
+								"scheduling",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
