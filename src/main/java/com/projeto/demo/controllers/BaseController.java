@@ -17,4 +17,8 @@ public abstract class BaseController {
         throw new IllegalStateException("User not authenticated");
     }
 
+    protected boolean isAdmin() {
+        return getLoggedUser().getRole().equals("ADMIN");
+    }
+
 }

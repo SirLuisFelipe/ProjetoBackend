@@ -1,6 +1,6 @@
 package com.projeto.demo.controllers;
 
-import com.projeto.demo.entities.User;
+import com.projeto.demo.exceptions.UnauthorizedActionException;
 import com.projeto.demo.services.PaymentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,10 +17,8 @@ public class PaymentController extends BaseController {
     @PostMapping("/")
     public ResponseEntity<?> createPayment(@RequestBody String paymentName) {
         try {
-            User user = getLoggedUser();
-
-            if (!user.getRole().equals("ADMIN")) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("You don't have permission to create a payment");
+            if (!isAdmin()) {
+                throw new UnauthorizedActionException();
             }
 
             return ResponseEntity.ok(paymentService.createPayment(paymentName));
@@ -50,6 +48,10 @@ public class PaymentController extends BaseController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deletePayment(@PathVariable Long id) {
         try {
+            if (!isAdmin()) {
+                throw new UnauthorizedActionException();
+            }
+
             paymentService.deletePayment(id);
             return ResponseEntity.ok().build();
         } catch (Exception e) {

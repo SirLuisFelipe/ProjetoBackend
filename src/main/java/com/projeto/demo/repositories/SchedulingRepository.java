@@ -8,6 +8,6 @@ import java.util.List;
 public interface SchedulingRepository extends JpaRepository<Scheduling, Long> {
 
     List<Scheduling> findByUserId(Long id);
-    List<Scheduling> findByTrackId(Long trackId);
 
+    List<Scheduling> findByTrackId(Long trackId);
 }

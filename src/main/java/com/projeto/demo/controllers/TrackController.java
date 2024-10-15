@@ -1,6 +1,6 @@
 package com.projeto.demo.controllers;
 
-import com.projeto.demo.entities.User;
+import com.projeto.demo.exceptions.UnauthorizedActionException;
 import com.projeto.demo.services.TrackService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,10 +17,8 @@ public class TrackController extends BaseController {
     @PostMapping("/")
     public ResponseEntity<?> createTrack(@RequestBody String trackName) {
         try {
-            User user = getLoggedUser();
-
-            if (!user.getRole().equals("ADMIN")) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("You don't have permission to create a track");
+            if (!isAdmin()) {
+                throw new UnauthorizedActionException();
             }
 
             return ResponseEntity.ok(trackService.createTrack(trackName));
@@ -50,6 +48,10 @@ public class TrackController extends BaseController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteTrack(@PathVariable Long id) {
         try {
+            if (!isAdmin()) {
+                throw new UnauthorizedActionException();
+            }
+
             trackService.deleteTrack(id);
             return ResponseEntity.ok().build();
         } catch (Exception e) {

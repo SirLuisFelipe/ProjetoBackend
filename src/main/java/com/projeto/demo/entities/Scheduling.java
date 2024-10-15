@@ -3,9 +3,7 @@ package com.projeto.demo.entities;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Data
 @Entity
@@ -33,5 +31,4 @@ public class Scheduling {
     private LocalDateTime scheduledTimeEnd;
 
     private Double paymentValue;
-
 }

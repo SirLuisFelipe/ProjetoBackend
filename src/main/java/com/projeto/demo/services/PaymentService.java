@@ -1,6 +1,7 @@
 package com.projeto.demo.services;
 
 import com.projeto.demo.entities.Payment;
+import com.projeto.demo.exceptions.PaymentNotFoundException;
 import com.projeto.demo.repositories.PaymentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,12 +26,11 @@ public class PaymentService {
     }
 
     public Payment findPaymentById(Long id) {
-        return paymentRepository.findById(id).orElseThrow(() -> new RuntimeException("Payment method not found"));
+        return paymentRepository.findById(id).orElseThrow(PaymentNotFoundException::new);
     }
 
     public void deletePayment(Long id) {
         Payment payment = findPaymentById(id);
         paymentRepository.delete(payment);
     }
-
 }
