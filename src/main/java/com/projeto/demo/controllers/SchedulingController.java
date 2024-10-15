@@ -41,6 +41,24 @@ public class SchedulingController {
         }
     }
 
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<?> listSchedulingsByUser(@PathVariable Long userId) {
+        try {
+            return ResponseEntity.ok(schedulingService.listSchedulingsByUserId(userId));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/track/{trackId}")
+    public ResponseEntity<?> listSchedulingsByTrack(@PathVariable Long trackId) {
+        try {
+            return ResponseEntity.ok(schedulingService.listSchedulingsByTrackId(trackId));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<?> findSchedulingById(@PathVariable Long id) {
         try {

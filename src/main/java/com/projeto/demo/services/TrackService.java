@@ -1,6 +1,7 @@
 package com.projeto.demo.services;
 
 import com.projeto.demo.entities.Track;
+import com.projeto.demo.exceptions.TrackNotFoundException;
 import com.projeto.demo.repositories.TrackRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,12 +26,11 @@ public class TrackService {
     }
 
     public Track findTrackById(Long id) {
-        return trackRepository.findById(id).orElseThrow(() -> new RuntimeException("Track not found"));
+        return trackRepository.findById(id).orElseThrow(TrackNotFoundException::new);
     }
 
     public void deleteTrack(Long id) {
         Track track = findTrackById(id);
         trackRepository.delete(track);
     }
-
 }

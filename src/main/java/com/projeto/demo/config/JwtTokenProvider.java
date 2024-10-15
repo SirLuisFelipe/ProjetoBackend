@@ -56,14 +56,6 @@ public class JwtTokenProvider {
         return false;
     }
 
-    public Long getIdFromToken(String token) {
-        return Jwts.parser()
-                .setSigningKey(jwtSecret)
-                .parseClaimsJws(token)
-                .getBody()
-                .get("id", Long.class);
-    }
-
     public String getEmailFromToken(String token) {
         return Jwts.parser()
                 .setSigningKey(jwtSecret)
@@ -71,21 +63,4 @@ public class JwtTokenProvider {
                 .getBody()
                 .getSubject();
     }
-
-    public String getCpfFromToken(String token) {
-        return Jwts.parser()
-                .setSigningKey(jwtSecret)
-                .parseClaimsJws(token)
-                .getBody()
-                .get("cpf", String.class);
-    }
-
-    public String getRoleFromToken(String token) {
-        return Jwts.parser()
-                .setSigningKey(jwtSecret)
-                .parseClaimsJws(token)
-                .getBody()
-                .get("role", String.class);
-    }
-
 }

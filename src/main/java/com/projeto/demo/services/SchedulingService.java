@@ -5,6 +5,8 @@ import com.projeto.demo.entities.Payment;
 import com.projeto.demo.entities.Scheduling;
 import com.projeto.demo.entities.Track;
 import com.projeto.demo.entities.User;
+import com.projeto.demo.exceptions.NullIdException;
+import com.projeto.demo.exceptions.SchedulingNotFoundException;
 import com.projeto.demo.repositories.SchedulingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,13 +32,15 @@ public class SchedulingService {
 
     public Scheduling createScheduling(CreateSchedulingDto createSchedulingDto) {
         Scheduling scheduling = mapToEntity(createSchedulingDto);
-
         return schedulingRepository.save(scheduling);
     }
 
     public Scheduling updateScheduling(CreateSchedulingDto createSchedulingDto){
-        Scheduling scheduling = mapToEntity(createSchedulingDto);
+        if (createSchedulingDto.getId() == null) {
+            throw new NullIdException();
+        }
 
+        Scheduling scheduling = mapToEntity(createSchedulingDto);
         return schedulingRepository.save(scheduling);
     }
 
@@ -66,7 +70,7 @@ public class SchedulingService {
     }
 
     public Scheduling findSchedulingById(Long id){
-        return schedulingRepository.findById(id).orElseThrow(() -> new RuntimeException("Scheduling not found"));
+        return schedulingRepository.findById(id).orElseThrow(SchedulingNotFoundException::new);
     }
 
     public void deleteScheduling(Long id){
