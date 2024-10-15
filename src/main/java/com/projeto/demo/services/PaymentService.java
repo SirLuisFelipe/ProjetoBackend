@@ -29,7 +29,8 @@ public class PaymentService {
     }
 
     public void deletePayment(Long id) {
-        paymentRepository.deleteById(id);
+        Payment payment = findPaymentById(id);
+        paymentRepository.delete(payment);
     }
 
 }

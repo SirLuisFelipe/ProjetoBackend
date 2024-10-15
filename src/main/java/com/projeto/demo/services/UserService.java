@@ -59,15 +59,15 @@ public class UserService {
     }
 
     public User findById(Long id) {
-        return userRepository.findById(id).orElseThrow(() -> new RuntimeException("Usuário não encontrado com o ID:" + id));
+        return userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
     }
 
     public User findByCpf(String cpf) {
-        return userRepository.findByCpf(cpf).orElseThrow(() -> new RuntimeException("Usuário não encontrado com o CPF:" + cpf));
+        return userRepository.findByCpf(cpf).orElseThrow(() -> new RuntimeException("User not found"));
     }
 
     public User findByEmail(String email) {
-        return userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("Usuário não encontrado com o email:" + email));
+        return userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
     }
 
     public List<User> listUsers() {
@@ -83,6 +83,4 @@ public class UserService {
         User user = findById(id);
         userRepository.delete(user);
     }
-
-
 }
