@@ -20,5 +20,4 @@ public abstract class BaseController {
     protected boolean isAdmin() {
         return getLoggedUser().getRole().equals("ADMIN");
     }
-
 }
