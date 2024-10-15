@@ -7,10 +7,7 @@ import java.util.List;
 
 public interface SchedulingRepository extends JpaRepository<Scheduling, Long> {
 
-    // buscar todos os agendamentos de um usuário específico
     List<Scheduling> findByUserId(Long id);
+    List<Scheduling> findByTrackId(Long trackId);
 
-
-    // Busca todos os agendamentos de um tipo de pista específico
-    List<Scheduling> findByTrackId(Integer trackid);
 }

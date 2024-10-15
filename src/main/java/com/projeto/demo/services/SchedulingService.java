@@ -1,6 +1,10 @@
 package com.projeto.demo.services;
 
+import com.projeto.demo.dto.CreateSchedulingDto;
+import com.projeto.demo.entities.Payment;
 import com.projeto.demo.entities.Scheduling;
+import com.projeto.demo.entities.Track;
+import com.projeto.demo.entities.User;
 import com.projeto.demo.repositories.SchedulingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -10,39 +14,71 @@ import java.util.Optional;
 
 @Service
 public class SchedulingService {
+
     @Autowired
     private SchedulingRepository schedulingRepository;
-    //  Buscar todos agendamentos
-    public List<Scheduling> getAllScheduling(){
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private PaymentService paymentService;
+
+    @Autowired
+    private TrackService trackService;
+
+
+    public Scheduling createScheduling(CreateSchedulingDto createSchedulingDto) {
+        Scheduling scheduling = mapToEntity(createSchedulingDto);
+
+        return schedulingRepository.save(scheduling);
+    }
+
+    public Scheduling updateScheduling(CreateSchedulingDto createSchedulingDto){
+        Scheduling scheduling = mapToEntity(createSchedulingDto);
+
+        return schedulingRepository.save(scheduling);
+    }
+
+    public Scheduling mapToEntity(CreateSchedulingDto createSchedulingDto){
+        Scheduling scheduling = new Scheduling();
+
+        if (createSchedulingDto.getId() != null) {
+            scheduling = findSchedulingById(createSchedulingDto.getId());
+        }
+
+        User user = userService.findById(createSchedulingDto.getUserId());
+        Payment payment = paymentService.findPaymentById(createSchedulingDto.getPaymentId());
+        Track track = trackService.findTrackById(createSchedulingDto.getTrackId());
+
+        scheduling.setUser(user);
+        scheduling.setPayment(payment);
+        scheduling.setTrack(track);
+        scheduling.setScheduledTimeEnd(createSchedulingDto.getScheduledTimeEnd());
+        scheduling.setScheduledTimeStart(createSchedulingDto.getScheduledTimeStart());
+        scheduling.setPaymentValue(createSchedulingDto.getPaymentValue());
+
+        return scheduling;
+    }
+
+    public List<Scheduling> listSchedulings(){
         return schedulingRepository.findAll();
     }
-    //  Buscar agendamento pelo Id
-    public Optional<Scheduling> getSchedulingById(Long id){
 
-        return schedulingRepository.findById(id);
+    public Scheduling findSchedulingById(Long id){
+        return schedulingRepository.findById(id).orElseThrow(() -> new RuntimeException("Scheduling not found"));
     }
-    //  Cria novo agendamento
-    public Scheduling createScheduling(Scheduling scheduling){
 
-        return schedulingRepository.save(scheduling);
-    }
-    //  Atualiza agendamento
-    public Scheduling updateScheduling(Scheduling scheduling){
-
-        return schedulingRepository.save(scheduling);
-    }
-    //    Exclui um agendamento
     public void deleteScheduling(Long id){
-
-        schedulingRepository.deleteById(id);
+        Scheduling scheduling = findSchedulingById(id);
+        schedulingRepository.delete(scheduling);
     }
 
-    //  Busca todos agendamentos de um usuario
-    public List<Scheduling> getSchedulingsByUserId(Long userId) {
+    public List<Scheduling> listSchedulingsByUserId(Long userId) {
         return schedulingRepository.findByUserId(userId);
     }
-    //  Buscar todos agendamentos por tipo de pista
-    public List<Scheduling> getSchedulingsByTrackid(Integer trackid){
-        return schedulingRepository.findByTrackId(trackid);
+
+    public List<Scheduling> listSchedulingsByTrackId(Long trackId){
+        return schedulingRepository.findByTrackId(trackId);
     }
 }
