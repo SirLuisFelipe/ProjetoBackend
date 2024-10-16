@@ -6,6 +6,9 @@
 - Docker
 - PostgreSQL
 
+## Documentação
+A documentação dos endpoints via swagger estará disponível no caminho `/reservation/swagger-ui.html`
+
 ## Como Rodar Localmente
 
 ### Passo 1: Subir o Banco de Dados
