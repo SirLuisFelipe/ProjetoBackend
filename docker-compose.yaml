@@ -1,0 +1,31 @@
+services:
+  backend:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - database
+    networks:
+      - project-net
+
+  database:
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: reservation
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - project-net
+
+networks:
+  project-net:
+    driver: bridge
+
+volumes:
+  postgres_data:

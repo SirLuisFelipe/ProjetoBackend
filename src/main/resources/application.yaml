@@ -1,0 +1,27 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /reservation
+
+spring:
+  application:
+    name: "Projeto"
+  datasource:
+    url: jdbc:postgresql://localhost:5432/reservation
+    username: postgres
+    password: postgres
+    driver:
+      class: org.hibernate.dialect.PostgreSQL10Dialect
+  liquibase:
+    change-log: classpath:/db/dbchangeLog.xml
+  jpa:
+    hibernate:
+      ddl-auto: none
+
+jwt:
+  secret: "tokensecret"
+  expiration: 7
+
+springdoc:
+  swagger-ui:
+    url: /openapi.yaml
