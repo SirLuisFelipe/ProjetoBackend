@@ -41,6 +41,10 @@ components:
           type: string
         cpf:
           type: string
+        role:
+          type: string
+        encodedPassword:
+          type: string
 
     UserRegisterDto:
       type: object
@@ -49,7 +53,27 @@ components:
           type: string
         email:
           type: string
+        cpf:
+          type: string
         password:
+          type: string
+        role:
+          type: string
+
+    UserEditDto:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        cpf:
+          type: string
+        password:
+          type: string
+        role:
           type: string
 
     UserLoginDto:
@@ -90,9 +114,11 @@ components:
         scheduledTimeStart:
           type: string
           format: date-time
+          example: 2021-10-10T10:00:00
         scheduledTimeEnd:
           type: string
           format: date-time
+          example: 2021-10-10T11:00:00
         paymentValue:
           type: number
           format: float
@@ -111,9 +137,11 @@ components:
         scheduledTimeStart:
           type: string
           format: date-time
+          example: 2021-10-10T10:00:00
         scheduledTimeEnd:
           type: string
           format: date-time
+          example: 2021-10-10T10:00:00
         paymentValue:
           type: number
           format: float
@@ -442,7 +470,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserRegisterDto'
+              $ref: '#/components/schemas/UserEditDto'
       responses:
         '200':
           description: User successfully updated
