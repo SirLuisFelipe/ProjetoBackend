@@ -32,7 +32,18 @@ public class UserController extends BaseController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
+    @GetMapping("/search")
+    public ResponseEntity<?> searchUsers(@RequestParam("name") String name) {
+        try {
+            if (!isAdmin()) {
+                throw new UnauthorizedActionException();
+            }
 
+            return ResponseEntity.ok(userService.searchUsersByName(name));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
     @GetMapping("/id/{id}")
     public ResponseEntity<?> findById(@PathVariable Long id) {
         try {
