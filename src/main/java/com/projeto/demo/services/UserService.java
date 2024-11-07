@@ -28,6 +28,9 @@ public class UserService {
         User user = mapToEntity(userRegisterDto);
         return userRepository.save(user);
     }
+    public List<User> searchUsersByName(String name) {
+        return userRepository.findByNameContainingIgnoreCase(name);
+    }
 
     public User update(UserRegisterDto userRegisterDto) {
         if (userRegisterDto.getId() == null) {
