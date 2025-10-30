@@ -35,9 +35,9 @@ public class UserController extends BaseController {
     @GetMapping("/search")
     public ResponseEntity<?> searchUsers(@RequestParam("name") String name) {
         try {
-            if (!isAdmin()) {
-                throw new UnauthorizedActionException();
-            }
+            // if (!isAdmin()) {
+            //     throw new UnauthorizedActionException();
+            //}
 
             return ResponseEntity.ok(userService.searchUsersByName(name));
         } catch (Exception e) {

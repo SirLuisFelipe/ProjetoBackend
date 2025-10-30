@@ -3,6 +3,7 @@ package com.projeto.demo.entities;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -26,9 +27,22 @@ public class Scheduling {
     @JoinColumn(name = "payment_id")
     private Payment payment;
 
-    private LocalDateTime scheduledTimeStart;
+    // Removendo Colunas antigas
+    //private LocalDateTime scheduledTimeStart;
+    //private LocalDateTime scheduledTimeEnd;
 
-    private LocalDateTime scheduledTimeEnd;
+    @Column(name = "scheduled_date")
+    private LocalDate scheduledDate;
+
+    @Enumerated(EnumType.STRING)
+    private Turno turno;
 
     private Double paymentValue;
+
+    // Enum para os tipos de turno
+    public enum Turno {
+        MATUTINO,
+        VESPERTINO,
+        NOTURNO
+    }
 }
