@@ -100,51 +100,67 @@ components:
         name:
           type: string
 
+    Turno:
+      type: string
+      enum: [ MATUTINO, VESPERTINO, NOTURNO ]
+      example: VESPERTINO
+
     CreateSchedulingDto:
       type: object
+      required:
+        - userId
+        - trackId
+        - scheduledDate
+        - turno
       properties:
         id:
           type: integer
+          example: 10
+          description: Usado apenas para update (PUT)
         userId:
           type: integer
+          example: 1
         paymentId:
           type: integer
+          nullable: true
+          example: null
         trackId:
           type: integer
-        scheduledTimeStart:
+          example: 2
+        scheduledDate:
           type: string
-          format: date-time
-          example: 2021-10-10T10:00:00
-        scheduledTimeEnd:
-          type: string
-          format: date-time
-          example: 2021-10-10T11:00:00
+          format: date
+          example: "2025-11-10"
+        turno:
+          $ref: '#/components/schemas/Turno'
         paymentValue:
           type: number
           format: float
+          example: 50.0
 
     Scheduling:
       type: object
       properties:
         id:
           type: integer
+          example: 10
         user:
           $ref: '#/components/schemas/User'
         payment:
           $ref: '#/components/schemas/Payment'
+          nullable: true
         track:
           $ref: '#/components/schemas/Track'
-        scheduledTimeStart:
+        scheduledDate:
           type: string
-          format: date-time
-          example: 2021-10-10T10:00:00
-        scheduledTimeEnd:
-          type: string
-          format: date-time
-          example: 2021-10-10T10:00:00
+          format: date
+          example: "2025-11-10"
+        turno:
+          $ref: '#/components/schemas/Turno'
         paymentValue:
           type: number
           format: float
+          example: 50.0
 
     Track:
       type: object
@@ -283,46 +299,71 @@ paths:
     post:
       tags:
         - Scheduling Service
-      summary: Creates a new schedule
+      summary: Creates a new schedule (date + turno)
       operationId: createScheduling
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       requestBody:
         required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/CreateSchedulingDto'
+            example:
+              userId: 1
+              trackId: 2
+              paymentId: null
+              scheduledDate: "2025-11-10"
+              turno: "VESPERTINO"
+              paymentValue: 0.0
       responses:
         '200':
           description: Schedule successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Scheduling'
         '500':
           description: Server error
+
     put:
       tags:
         - Scheduling Service
-      summary: Updates a schedule
+      summary: Updates an existing schedule
       operationId: updateScheduling
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       requestBody:
         required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/CreateSchedulingDto'
+            example:
+              id: 10
+              userId: 1
+              trackId: 2
+              paymentId: null
+              scheduledDate: "2025-11-11"
+              turno: "MATUTINO"
+              paymentValue: 75.0
       responses:
         '200':
           description: Schedule successfully updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Scheduling'
         '500':
           description: Server error
+
     get:
       tags:
         - Scheduling Service
       summary: Lists all schedules
       operationId: listSchedulings
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       responses:
         '200':
           description: Schedule list

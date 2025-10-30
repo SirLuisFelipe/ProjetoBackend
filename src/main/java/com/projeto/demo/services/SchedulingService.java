@@ -10,9 +10,10 @@ import com.projeto.demo.exceptions.SchedulingNotFoundException;
 import com.projeto.demo.repositories.SchedulingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class SchedulingService {
@@ -29,51 +30,96 @@ public class SchedulingService {
     @Autowired
     private TrackService trackService;
 
+    private static final int CAPACIDADE_POR_TURNO = 20;
 
-    public Scheduling createScheduling(CreateSchedulingDto createSchedulingDto) {
-        Scheduling scheduling = mapToEntity(createSchedulingDto);
+    /**
+     * Verifica se ainda há vagas disponíveis em um determinado dia e turno.
+     */
+    public boolean checkAvailability(Long trackId, LocalDate date, Scheduling.Turno turno) {
+        long qty = schedulingRepository
+                .countByTrack_IdAndScheduledDateAndTurno(trackId, date, turno);
+        return qty < CAPACIDADE_POR_TURNO;
+    }
+
+    /**
+     * Cria uma nova reserva, validando a disponibilidade antes de salvar.
+     */
+    @Transactional
+    public Scheduling createScheduling(CreateSchedulingDto dto) {
+        Scheduling.Turno turnoEnum = Scheduling.Turno.valueOf(dto.getTurno().toUpperCase());
+
+        if (!checkAvailability(dto.getTrackId(), dto.getScheduledDate(), turnoEnum)) {
+            throw new IllegalStateException("Capacidade máxima atingida para este dia/turno.");
+        }
+
+        User user = userService.findById(dto.getUserId());
+        Track track = trackService.findTrackById(dto.getTrackId());
+        Payment payment = (dto.getPaymentId() != null)
+                ? paymentService.findPaymentById(dto.getPaymentId())
+                : null;
+
+        Scheduling scheduling = new Scheduling();
+        scheduling.setUser(user);
+        scheduling.setTrack(track);
+        scheduling.setPayment(payment);
+        scheduling.setScheduledDate(dto.getScheduledDate());
+        scheduling.setTurno(turnoEnum);
+        scheduling.setPaymentValue(dto.getPaymentValue());
+
         return schedulingRepository.save(scheduling);
     }
 
-    public Scheduling updateScheduling(CreateSchedulingDto createSchedulingDto){
-        if (createSchedulingDto.getId() == null) {
+    /**
+     * Atualiza uma reserva existente (mantendo a checagem de disponibilidade).
+     */
+    @Transactional
+    public Scheduling updateScheduling(CreateSchedulingDto dto) {
+        if (dto.getId() == null) {
             throw new NullIdException();
         }
 
-        Scheduling scheduling = mapToEntity(createSchedulingDto);
+        Scheduling scheduling = findSchedulingById(dto.getId());
+        Scheduling.Turno turnoEnum = Scheduling.Turno.valueOf(dto.getTurno().toUpperCase());
+
+        // Se mudar a combinação de pista + data + turno, precisa checar disponibilidade
+        boolean mudouPista = !scheduling.getTrack().getId().equals(dto.getTrackId());
+        boolean mudouData = !scheduling.getScheduledDate().equals(dto.getScheduledDate());
+        boolean mudouTurno = !scheduling.getTurno().equals(turnoEnum);
+
+        if (mudouPista || mudouData || mudouTurno) {
+            if (!checkAvailability(dto.getTrackId(), dto.getScheduledDate(), turnoEnum)) {
+                throw new IllegalStateException("Capacidade máxima atingida para este dia/turno.");
+            }
+        }
+
+        User user = userService.findById(dto.getUserId());
+        Track track = trackService.findTrackById(dto.getTrackId());
+        Payment payment = (dto.getPaymentId() != null)
+                ? paymentService.findPaymentById(dto.getPaymentId())
+                : null;
+
+        scheduling.setUser(user);
+        scheduling.setTrack(track);
+        scheduling.setPayment(payment);
+        scheduling.setScheduledDate(dto.getScheduledDate());
+        scheduling.setTurno(turnoEnum);
+        scheduling.setPaymentValue(dto.getPaymentValue());
+
         return schedulingRepository.save(scheduling);
     }
 
-    public Scheduling mapToEntity(CreateSchedulingDto createSchedulingDto){
-        Scheduling scheduling = new Scheduling();
+    // --- Métodos auxiliares ---
 
-        if (createSchedulingDto.getId() != null) {
-            scheduling = findSchedulingById(createSchedulingDto.getId());
-        }
-
-        User user = userService.findById(createSchedulingDto.getUserId());
-        Payment payment = paymentService.findPaymentById(createSchedulingDto.getPaymentId());
-        Track track = trackService.findTrackById(createSchedulingDto.getTrackId());
-
-        scheduling.setUser(user);
-        scheduling.setPayment(payment);
-        scheduling.setTrack(track);
-        scheduling.setScheduledTimeEnd(createSchedulingDto.getScheduledTimeEnd());
-        scheduling.setScheduledTimeStart(createSchedulingDto.getScheduledTimeStart());
-        scheduling.setPaymentValue(createSchedulingDto.getPaymentValue());
-
-        return scheduling;
+    public Scheduling findSchedulingById(Long id) {
+        return schedulingRepository.findById(id)
+                .orElseThrow(SchedulingNotFoundException::new);
     }
 
-    public List<Scheduling> listSchedulings(){
+    public List<Scheduling> listSchedulings() {
         return schedulingRepository.findAll();
     }
 
-    public Scheduling findSchedulingById(Long id){
-        return schedulingRepository.findById(id).orElseThrow(SchedulingNotFoundException::new);
-    }
-
-    public void deleteScheduling(Long id){
+    public void deleteScheduling(Long id) {
         Scheduling scheduling = findSchedulingById(id);
         schedulingRepository.delete(scheduling);
     }
@@ -82,7 +128,7 @@ public class SchedulingService {
         return schedulingRepository.findByUserId(userId);
     }
 
-    public List<Scheduling> listSchedulingsByTrackId(Long trackId){
+    public List<Scheduling> listSchedulingsByTrackId(Long trackId) {
         return schedulingRepository.findByTrackId(trackId);
     }
 }

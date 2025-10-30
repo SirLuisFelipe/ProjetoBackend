@@ -45,4 +45,31 @@ http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
             <column name="payment_value" type="DOUBLE PRECISION"/>
         </createTable>
     </changeSet>
+
+    <!-- Migration para remover as colunas antigas e adicionar as novas -->
+    <changeSet id="2" author="luis_felipe">
+        <!-- Removendo colunas antigas para novas regras de negocio -->
+        <dropColumn tableName="scheduling" columnName="scheduled_time_start"/>
+        <dropColumn tableName="scheduling" columnName="scheduled_time_end"/>
+
+        <!-- Adicionar a nova coluna scheduledDate -->
+        <addColumn tableName="scheduling">
+            <column name="scheduledDate" type="date"/>
+        </addColumn>
+
+        <!-- Adicionar a nova coluna turno -->
+        <addColumn tableName="scheduling">
+            <column name="turno" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="3" author="luis_felipe">
+        <!-- Renomear a coluna de scheduledDate para scheduled_Date para manter o padrao -->
+        <renameColumn tableName="scheduling" oldColumnName="scheduledDate" newColumnName="scheduled_Date" columnDataType="date"/>
+    </changeSet>
+
+    <changeSet id="4" author="luis_felipe">
+        <!-- Padronizando com todas letras minusculas -->
+        <renameColumn tableName="scheduling" oldColumnName="scheduled_Date" newColumnName="scheduled_date" columnDataType="date"/>
+    </changeSet>
 </databaseChangeLog>
