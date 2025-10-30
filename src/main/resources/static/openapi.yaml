@@ -313,7 +313,7 @@ paths:
               userId: 1
               trackId: 2
               paymentId: null
-              scheduledDate: "2025-11-10"
+              scheduledDate: "1900-01-01"
               turno: "VESPERTINO"
               paymentValue: 0.0
       responses:
