@@ -536,29 +536,6 @@ paths:
         '500':
           description: Server error
 
-  /user/id/{id}:
-    get:
-      tags:
-        - User Service
-      summary: Retrieves a user by ID
-      operationId: getUserById
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: User found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
-        '500':
-          description: Server error
   /user/search:
     get:
       tags:
@@ -582,13 +559,38 @@ paths:
                 $ref: '#/components/schemas/User'
         '500':
           description: Server error
+
+
+  /user/id/{id}:
+    get:
+      tags:
+        - User Service
+      summary: Retrieves a user by ID
+      operationId: getUserById
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: User found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '500':
+          description: Server error
     delete:
       tags:
         - User Service
       summary: Deletes a user by ID
       operationId: deleteUserById
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       parameters:
         - name: id
           in: path
@@ -600,3 +602,28 @@ paths:
           description: User successfully deleted
         '500':
           description: Server error
+
+  /user/cpf/{cpf}:
+    delete:
+      tags:
+        - User Service
+      summary: Deletes a user by CPF
+      operationId: deleteUserByCpf
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: cpf
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '500':
+          description: Server error
+
