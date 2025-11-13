@@ -133,10 +133,6 @@ components:
           example: "2025-11-10"
         turno:
           $ref: '#/components/schemas/Turno'
-        paymentValue:
-          type: number
-          format: float
-          example: 50.0
 
     Scheduling:
       type: object
@@ -157,10 +153,6 @@ components:
           example: "2025-11-10"
         turno:
           $ref: '#/components/schemas/Turno'
-        paymentValue:
-          type: number
-          format: float
-          example: 50.0
 
     Track:
       type: object
@@ -312,10 +304,9 @@ paths:
             example:
               userId: 1
               trackId: 2
-              paymentId: null
+              paymentId: 3
               scheduledDate: "1900-01-01"
               turno: "VESPERTINO"
-              paymentValue: 0.0
       responses:
         '200':
           description: Schedule successfully created
@@ -346,7 +337,6 @@ paths:
               paymentId: null
               scheduledDate: "2025-11-11"
               turno: "MATUTINO"
-              paymentValue: 75.0
       responses:
         '200':
           description: Schedule successfully updated

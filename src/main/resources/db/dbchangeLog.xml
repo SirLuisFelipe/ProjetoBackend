@@ -72,4 +72,19 @@ http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
         <!-- Padronizando com todas letras minusculas -->
         <renameColumn tableName="scheduling" oldColumnName="scheduled_Date" newColumnName="scheduled_date" columnDataType="date"/>
     </changeSet>
+
+    <changeSet id="5" author="luis_felipe">
+        <!-- Excluindo coluna antiga que nao faz mais sentido para a regra de negocio atual -->
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <columnExists tableName="scheduling" columnName="payment_value"/>
+        </preConditions>
+
+        <dropColumn tableName="scheduling" columnName="payment_value"/>
+
+        <rollback>
+            <addColumn tableName="scheduling">
+                <column name="payment_value" type="double precision"/>
+            </addColumn>
+        </rollback>
+    </changeSet>
 </databaseChangeLog>

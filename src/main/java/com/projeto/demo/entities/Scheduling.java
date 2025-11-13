@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Data
 @Entity
@@ -37,7 +36,7 @@ public class Scheduling {
     @Enumerated(EnumType.STRING)
     private Turno turno;
 
-    private Double paymentValue;
+    // private Double paymentValue;
 
     // Enum para os tipos de turno
     public enum Turno {
