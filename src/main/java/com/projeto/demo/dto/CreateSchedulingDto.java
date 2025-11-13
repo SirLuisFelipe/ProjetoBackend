@@ -3,7 +3,6 @@ package com.projeto.demo.dto;
 import lombok.Data;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Data
 public class CreateSchedulingDto {
@@ -19,8 +18,6 @@ public class CreateSchedulingDto {
     private LocalDate scheduledDate;   // yyyy-MM-dd
 
     private String turno;               // MATUTINO / VESPERTINO / NOTURNO
-
-    private Double paymentValue;
 
     // Excluido colunas de data antiga
     // private LocalDateTime scheduledTimeStart;

@@ -72,4 +72,11 @@ http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
         <!-- Padronizando com todas letras minusculas -->
         <renameColumn tableName="scheduling" oldColumnName="scheduled_Date" newColumnName="scheduled_date" columnDataType="date"/>
     </changeSet>
+
+        <!-- Migration para remover as colunas antigas e adicionar as novas -->
+    <changeSet id="5" author="luis_felipe">
+        <!-- Removendo colunas antigas para novas regras de negocio -->
+        <dropColumn tableName="scheduling" columnName="payment_value"/>
+
+    </changeSet>
 </databaseChangeLog>
