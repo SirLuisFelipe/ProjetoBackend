@@ -64,7 +64,6 @@ public class SchedulingService {
         scheduling.setPayment(payment);
         scheduling.setScheduledDate(dto.getScheduledDate());
         scheduling.setTurno(turnoEnum);
-        //scheduling.setPaymentValue(dto.getPaymentValue());
 
         return schedulingRepository.save(scheduling);
     }
@@ -103,7 +102,6 @@ public class SchedulingService {
         scheduling.setPayment(payment);
         scheduling.setScheduledDate(dto.getScheduledDate());
         scheduling.setTurno(turnoEnum);
-        scheduling.setPaymentValue(dto.getPaymentValue());
 
         return schedulingRepository.save(scheduling);
     }

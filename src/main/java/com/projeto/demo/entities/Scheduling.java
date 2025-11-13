@@ -36,7 +36,6 @@ public class Scheduling {
     @Enumerated(EnumType.STRING)
     private Turno turno;
 
-    private Double paymentValue;
 
     // Enum para os tipos de turno
     public enum Turno {
