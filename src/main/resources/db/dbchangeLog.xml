@@ -75,7 +75,7 @@ http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
 
         <!-- Migration para remover as colunas antigas e adicionar as novas -->
     <changeSet id="5" author="luis_felipe">
-        <!-- Removendo colunas antigas para novas regras de negocio -->
+        <!-- Removendo colunas antigas para novas regras de negocio referente ao paymentValue que nao existe mais -->
         <dropColumn tableName="scheduling" columnName="payment_value"/>
 
     </changeSet>
