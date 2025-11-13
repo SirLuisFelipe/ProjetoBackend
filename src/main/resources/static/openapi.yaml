@@ -304,7 +304,7 @@ paths:
             example:
               userId: 1
               trackId: 2
-              paymentId: null
+              paymentId: 3
               scheduledDate: "1900-01-01"
               turno: "VESPERTINO"
       responses:
