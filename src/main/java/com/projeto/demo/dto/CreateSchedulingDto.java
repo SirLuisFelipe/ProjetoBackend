@@ -19,6 +19,8 @@ public class CreateSchedulingDto {
 
     private String turno;               // MATUTINO / VESPERTINO / NOTURNO
 
+    private String checkinStatus;       // PENDENTE / NAO_REALIZADO / REALIZADO / CANCELADO
+
     // Excluido colunas de data antiga
     // private LocalDateTime scheduledTimeStart;
     // private LocalDateTime scheduledTimeEnd;

@@ -105,6 +105,11 @@ components:
       enum: [ MATUTINO, VESPERTINO, NOTURNO ]
       example: VESPERTINO
 
+    CheckinStatus:
+      type: string
+      enum: [ PENDENTE, NAO_REALIZADO, REALIZADO, CANCELADO ]
+      example: PENDENTE
+
     CreateSchedulingDto:
       type: object
       required:
@@ -133,6 +138,9 @@ components:
           example: "2025-11-10"
         turno:
           $ref: '#/components/schemas/Turno'
+        checkinStatus:
+          $ref: '#/components/schemas/CheckinStatus'
+          description: Campo opcional usado em respostas e pode ser enviado em atualizações para alterar o status (regras de negócio se aplicam).
 
     Scheduling:
       type: object
@@ -153,6 +161,8 @@ components:
           example: "2025-11-10"
         turno:
           $ref: '#/components/schemas/Turno'
+        checkinStatus:
+          $ref: '#/components/schemas/CheckinStatus'
 
     Track:
       type: object
@@ -302,11 +312,12 @@ paths:
             schema:
               $ref: '#/components/schemas/CreateSchedulingDto'
             example:
-              userId: 1
-              trackId: 2
-              paymentId: 3
-              scheduledDate: "1900-01-01"
-              turno: "VESPERTINO"
+              userId: 1 # ID do usuario que esta criando o agendamento
+              trackId: 2 # ID da pista que esta sendo agendada 
+              paymentId: 3 # ID do pagamento associado (pode ser null)
+              scheduledDate: "2026-01-01" # Data do agendamento
+              turno: "VESPERTINO" # OPCOES: MATUTINO, VESPERTINO, NOTURNO
+              "checkinStatus": "PENDENTE" #VALOR PADRAO PARA NOVOS AGENDAMENTOS
       responses:
         '200':
           description: Schedule successfully created
@@ -337,6 +348,7 @@ paths:
               paymentId: null
               scheduledDate: "2025-11-11"
               turno: "MATUTINO"
+              "checkinStatus": "PENDENTE"
       responses:
         '200':
           description: Schedule successfully updated

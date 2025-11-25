@@ -36,11 +36,22 @@ public class Scheduling {
     @Enumerated(EnumType.STRING)
     private Turno turno;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "checkin_status")
+    private CheckinStatus checkinStatus;
+
 
     // Enum para os tipos de turno
     public enum Turno {
         MATUTINO,
         VESPERTINO,
         NOTURNO
+    }
+
+    public enum CheckinStatus {
+        PENDENTE,
+        NAO_REALIZADO,
+        REALIZADO,
+        CANCELADO
     }
 }

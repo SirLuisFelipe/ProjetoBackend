@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/scheduling")
-public class SchedulingController {
+public class SchedulingController extends BaseController {
 
     @Autowired
     private SchedulingService schedulingService;
@@ -26,7 +26,7 @@ public class SchedulingController {
     @PutMapping("/")
     public ResponseEntity<?> updateScheduling(@RequestBody CreateSchedulingDto createSchedulingDto) {
         try {
-            return ResponseEntity.ok(schedulingService.updateScheduling(createSchedulingDto));
+            return ResponseEntity.ok(schedulingService.updateScheduling(createSchedulingDto, getLoggedUser()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
