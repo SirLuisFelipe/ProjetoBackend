@@ -1,6 +1,13 @@
 package com.projeto.demo.services;
 
 import com.projeto.demo.dto.CreateSchedulingDto;
+import com.projeto.demo.dto.SchedulingCancellationStatsDto;
+import com.projeto.demo.dto.SchedulingDaySummaryDto;
+import com.projeto.demo.dto.SchedulingPaymentSummaryDto;
+import com.projeto.demo.dto.SchedulingTimelinePointDto;
+import com.projeto.demo.dto.SchedulingTrackSummaryDto;
+import com.projeto.demo.dto.SchedulingTurnoSummaryDto;
+import com.projeto.demo.dto.SchedulingUserSummaryDto;
 import com.projeto.demo.entities.Payment;
 import com.projeto.demo.entities.Scheduling;
 import com.projeto.demo.entities.Track;
@@ -9,13 +16,22 @@ import com.projeto.demo.exceptions.NullIdException;
 import com.projeto.demo.exceptions.SchedulingNotFoundException;
 import com.projeto.demo.exceptions.UnauthorizedActionException;
 import com.projeto.demo.repositories.SchedulingRepository;
+import com.projeto.demo.repositories.projections.PaymentCountProjection;
+import com.projeto.demo.repositories.projections.TimelineCountProjection;
+import com.projeto.demo.repositories.projections.TrackCountProjection;
+import com.projeto.demo.repositories.projections.TurnoCountProjection;
+import com.projeto.demo.repositories.projections.UserCountProjection;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.text.Normalizer;
 import java.time.LocalDate;
+import java.time.YearMonth;
+import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
 
 @Service
@@ -33,7 +49,7 @@ public class SchedulingService {
     @Autowired
     private TrackService trackService;
 
-    private static final int CAPACIDADE_POR_TURNO = 20;
+    private static final int CAPACIDADE_POR_TURNO = 25;
     private static final String PAST_SCHEDULING_MESSAGE = "Não é possível manipular agendamentos passados.";
 
     /**
@@ -148,6 +164,82 @@ public class SchedulingService {
         return schedulingRepository.findByTrackId(trackId);
     }
 
+    public SchedulingDaySummaryDto getSchedulingSummaryByDay(LocalDate date) {
+        if (date == null) {
+            throw new IllegalArgumentException("date é obrigatório.");
+        }
+
+        List<TurnoCountProjection> counts = schedulingRepository.countByDateGroupedByTurno(date);
+        EnumMap<Scheduling.Turno, Long> totals = new EnumMap<>(Scheduling.Turno.class);
+        counts.forEach(c -> totals.put(c.getTurno(), c.getTotal()));
+
+        List<SchedulingTurnoSummaryDto> summaries = new ArrayList<>();
+        for (Scheduling.Turno turno : Scheduling.Turno.values()) {
+            summaries.add(new SchedulingTurnoSummaryDto(turno, totals.getOrDefault(turno, 0L)));
+        }
+
+        return new SchedulingDaySummaryDto(date, summaries);
+    }
+
+    public List<SchedulingTrackSummaryDto> getSchedulingSummaryByTrack() {
+        List<TrackCountProjection> counts = schedulingRepository.countByTrack();
+        List<SchedulingTrackSummaryDto> result = new ArrayList<>();
+        counts.forEach(c -> result.add(new SchedulingTrackSummaryDto(
+                c.getTrackId(),
+                c.getTrackName(),
+                c.getTotal()
+        )));
+        return result;
+    }
+
+    public List<SchedulingPaymentSummaryDto> getSchedulingSummaryByPayment() {
+        List<PaymentCountProjection> counts = schedulingRepository.countByPayment();
+        List<SchedulingPaymentSummaryDto> result = new ArrayList<>();
+        counts.forEach(c -> result.add(new SchedulingPaymentSummaryDto(
+                c.getPaymentId(),
+                c.getPaymentName(),
+                c.getTotal()
+        )));
+        return result;
+    }
+
+    public List<SchedulingUserSummaryDto> getTopUsersByScheduling(int limit) {
+        int normalizedLimit = limit <= 0 ? 10 : limit;
+        List<UserCountProjection> counts = schedulingRepository.countByUser(PageRequest.of(0, normalizedLimit));
+        List<SchedulingUserSummaryDto> result = new ArrayList<>();
+        counts.forEach(c -> result.add(new SchedulingUserSummaryDto(
+                c.getUserId(),
+                c.getUserName(),
+                c.getTotal()
+        )));
+        return result;
+    }
+
+    public List<SchedulingTimelinePointDto> getSchedulingTimeline(int months) {
+        LocalDate startDate = calculateStartDate(months);
+        List<TimelineCountProjection> counts = schedulingRepository.countTimelineFrom(startDate);
+        List<SchedulingTimelinePointDto> result = new ArrayList<>();
+        counts.forEach(c -> result.add(new SchedulingTimelinePointDto(
+                formatYearMonth(c.getYear(), c.getMonth()),
+                c.getTotal()
+        )));
+        return result;
+    }
+
+    public SchedulingCancellationStatsDto getCancellationStats(int months) {
+        LocalDate startDate = calculateStartDate(months);
+        LocalDate endDate = LocalDate.now();
+
+        long total = schedulingRepository.countByScheduledDateBetween(startDate, endDate);
+        long cancelled = schedulingRepository.countByScheduledDateBetweenAndCheckinStatus(
+                startDate, endDate, Scheduling.CheckinStatus.CANCELADO);
+        double percentage = total == 0 ? 0 : (cancelled * 100.0) / total;
+
+        return new SchedulingCancellationStatsDto(
+                normalizeMonths(months), total, cancelled, percentage
+        );
+    }
+
     public Scheduling updateCheckinStatus(Long schedulingId, String requestedStatus, User actor) {
         Scheduling scheduling = findSchedulingById(schedulingId);
         applyCheckinStatusChange(scheduling, requestedStatus, actor);
@@ -243,5 +335,23 @@ public class SchedulingService {
 
     private boolean isAdmin(User user) {
         return user.getRole() != null && user.getRole().equalsIgnoreCase("ADMIN");
+    }
+
+    private LocalDate calculateStartDate(int months) {
+        int normalizedMonths = normalizeMonths(months);
+        YearMonth currentMonth = YearMonth.now();
+        YearMonth startMonth = currentMonth.minusMonths(normalizedMonths - 1L);
+        return startMonth.atDay(1);
+    }
+
+    private int normalizeMonths(int months) {
+        return months <= 0 ? 6 : months;
+    }
+
+    private String formatYearMonth(Integer year, Integer month) {
+        if (year == null || month == null) {
+            return "";
+        }
+        return String.format("%04d-%02d", year, month);
     }
 }

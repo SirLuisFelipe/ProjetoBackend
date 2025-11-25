@@ -17,6 +17,8 @@ tags:
     description: Endpoints for managing payments
   - name: Scheduling Service
     description: Endpoints for scheduling management
+  - name: Scheduling Analytics
+    description: Aggregated scheduling data for dashboards
   - name: Track Service
     description: Endpoints for track management
   - name: User Service
@@ -163,6 +165,81 @@ components:
           $ref: '#/components/schemas/Turno'
         checkinStatus:
           $ref: '#/components/schemas/CheckinStatus'
+    SchedulingTurnoSummary:
+      type: object
+      properties:
+        turno:
+          $ref: '#/components/schemas/Turno'
+        total:
+          type: integer
+          format: int64
+    SchedulingDaySummary:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        turnos:
+          type: array
+          items:
+            $ref: '#/components/schemas/SchedulingTurnoSummary'
+    SchedulingTrackSummary:
+      type: object
+      properties:
+        trackId:
+          type: integer
+        trackName:
+          type: string
+        total:
+          type: integer
+          format: int64
+    SchedulingPaymentSummary:
+      type: object
+      properties:
+        paymentId:
+          type: integer
+          format: int64
+          nullable: true
+        paymentName:
+          type: string
+          nullable: true
+        total:
+          type: integer
+          format: int64
+    SchedulingUserSummary:
+      type: object
+      properties:
+        userId:
+          type: integer
+          format: int64
+        userName:
+          type: string
+        total:
+          type: integer
+          format: int64
+    SchedulingTimelinePoint:
+      type: object
+      properties:
+        period:
+          type: string
+          example: "2025-01"
+        total:
+          type: integer
+          format: int64
+    SchedulingCancellationStats:
+      type: object
+      properties:
+        months:
+          type: integer
+        total:
+          type: integer
+          format: int64
+        cancelled:
+          type: integer
+          format: int64
+        percentage:
+          type: number
+          format: double
 
     Track:
       type: object
@@ -417,6 +494,150 @@ paths:
       responses:
         '200':
           description: Schedule successfully deleted
+        '500':
+          description: Server error
+
+  /scheduling/analytics/day:
+    get:
+      tags:
+        - Scheduling Analytics
+      summary: Retorna a quantidade de agendamentos por turno em um dia específico
+      operationId: getSchedulingSummaryByDay
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: date
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Totais por turno retornados com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SchedulingDaySummary'
+        '500':
+          description: Server error
+
+  /scheduling/analytics/by-track:
+    get:
+      tags:
+        - Scheduling Analytics
+      summary: Retorna a quantidade total de agendamentos por pista
+      operationId: getSchedulingSummaryByTrack
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Totais por pista retornados com sucesso
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SchedulingTrackSummary'
+        '500':
+          description: Server error
+
+  /scheduling/analytics/by-payment:
+    get:
+      tags:
+        - Scheduling Analytics
+      summary: Retorna a quantidade total de agendamentos por forma de pagamento
+      operationId: getSchedulingSummaryByPayment
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Totais por pagamento retornados com sucesso
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SchedulingPaymentSummary'
+        '500':
+          description: Server error
+
+  /scheduling/analytics/by-user:
+    get:
+      tags:
+        - Scheduling Analytics
+      summary: Retorna o ranking de usuários por quantidade de agendamentos
+      operationId: getSchedulingSummaryByUser
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: Totais por usuário retornados com sucesso
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SchedulingUserSummary'
+        '500':
+          description: Server error
+
+  /scheduling/analytics/timeline:
+    get:
+      tags:
+        - Scheduling Analytics
+      summary: Retorna a quantidade de agendamentos por mês em um período
+      operationId: getSchedulingTimeline
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: months
+          required: false
+          schema:
+            type: integer
+            default: 6
+      responses:
+        '200':
+          description: Timeline retornada com sucesso
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SchedulingTimelinePoint'
+        '500':
+          description: Server error
+
+  /scheduling/analytics/cancellations:
+    get:
+      tags:
+        - Scheduling Analytics
+      summary: Retorna o percentual de cancelamentos nos últimos meses
+      operationId: getSchedulingCancellationStats
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: months
+          required: false
+          schema:
+            type: integer
+            default: 6
+      responses:
+        '200':
+          description: Percentual de cancelamentos retornado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SchedulingCancellationStats'
         '500':
           description: Server error
 

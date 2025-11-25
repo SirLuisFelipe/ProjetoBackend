@@ -18,6 +18,14 @@ public abstract class BaseController {
     }
 
     protected boolean isAdmin() {
-        return getLoggedUser().getRole().equals("ADMIN");
+        User user = getLoggedUser();
+        String role = user.getRole();
+        if (role == null) {
+            return false;
+        }
+        if (role.toUpperCase().startsWith("ROLE_")) {
+            role = role.substring(5);
+        }
+        return "ADMIN".equalsIgnoreCase(role);
     }
 }
