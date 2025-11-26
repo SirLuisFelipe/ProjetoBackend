@@ -16,6 +16,7 @@ import com.projeto.demo.exceptions.NullIdException;
 import com.projeto.demo.exceptions.SchedulingNotFoundException;
 import com.projeto.demo.exceptions.UnauthorizedActionException;
 import com.projeto.demo.repositories.SchedulingRepository;
+import com.projeto.demo.repositories.projections.DateTurnoCountProjection;
 import com.projeto.demo.repositories.projections.PaymentCountProjection;
 import com.projeto.demo.repositories.projections.TimelineCountProjection;
 import com.projeto.demo.repositories.projections.TrackCountProjection;
@@ -30,9 +31,12 @@ import org.springframework.transaction.annotation.Transactional;
 import java.text.Normalizer;
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 @Service
 public class SchedulingService {
@@ -181,8 +185,45 @@ public class SchedulingService {
         return new SchedulingDaySummaryDto(date, summaries);
     }
 
-    public List<SchedulingTrackSummaryDto> getSchedulingSummaryByTrack() {
-        List<TrackCountProjection> counts = schedulingRepository.countByTrack();
+    public List<SchedulingDaySummaryDto> getSchedulingSummaryByDayRange(LocalDate startDate, LocalDate endDate) {
+        DateRange range = resolveRangeWithDataset(startDate, endDate);
+        if (range == null) {
+            return List.of();
+        }
+
+        List<DateTurnoCountProjection> counts = schedulingRepository
+                .countByDateRangeGroupedByTurno(range.start(), range.end());
+
+        TreeMap<LocalDate, EnumMap<Scheduling.Turno, Long>> byDate = new TreeMap<>();
+        counts.forEach(c -> {
+            EnumMap<Scheduling.Turno, Long> totals = byDate
+                    .computeIfAbsent(c.getDate(), d -> new EnumMap<>(Scheduling.Turno.class));
+            totals.put(c.getTurno(), c.getTotal());
+        });
+
+        List<SchedulingDaySummaryDto> summaries = new ArrayList<>();
+        LocalDate current = range.start();
+        while (!current.isAfter(range.end())) {
+            EnumMap<Scheduling.Turno, Long> totals = byDate.getOrDefault(current, new EnumMap<>(Scheduling.Turno.class));
+            List<SchedulingTurnoSummaryDto> turnos = new ArrayList<>();
+            for (Scheduling.Turno turno : Scheduling.Turno.values()) {
+                turnos.add(new SchedulingTurnoSummaryDto(turno, totals.getOrDefault(turno, 0L)));
+            }
+            summaries.add(new SchedulingDaySummaryDto(current, turnos));
+            current = current.plusDays(1);
+        }
+
+        return summaries;
+    }
+
+    public List<SchedulingTrackSummaryDto> getSchedulingSummaryByTrack(LocalDate startDate, LocalDate endDate) {
+        DateRange range = normalizeOptionalRange(startDate, endDate);
+        List<TrackCountProjection> counts;
+        if (range.start() == null) {
+            counts = schedulingRepository.countByTrack();
+        } else {
+            counts = schedulingRepository.countByTrackBetween(range.start(), range.end());
+        }
         List<SchedulingTrackSummaryDto> result = new ArrayList<>();
         counts.forEach(c -> result.add(new SchedulingTrackSummaryDto(
                 c.getTrackId(),
@@ -192,8 +233,14 @@ public class SchedulingService {
         return result;
     }
 
-    public List<SchedulingPaymentSummaryDto> getSchedulingSummaryByPayment() {
-        List<PaymentCountProjection> counts = schedulingRepository.countByPayment();
+    public List<SchedulingPaymentSummaryDto> getSchedulingSummaryByPayment(LocalDate startDate, LocalDate endDate) {
+        DateRange range = normalizeOptionalRange(startDate, endDate);
+        List<PaymentCountProjection> counts;
+        if (range.start() == null) {
+            counts = schedulingRepository.countByPayment();
+        } else {
+            counts = schedulingRepository.countByPaymentBetween(range.start(), range.end());
+        }
         List<SchedulingPaymentSummaryDto> result = new ArrayList<>();
         counts.forEach(c -> result.add(new SchedulingPaymentSummaryDto(
                 c.getPaymentId(),
@@ -203,9 +250,18 @@ public class SchedulingService {
         return result;
     }
 
-    public List<SchedulingUserSummaryDto> getTopUsersByScheduling(int limit) {
+    public List<SchedulingUserSummaryDto> getTopUsersByScheduling(int limit,
+                                                                  LocalDate startDate,
+                                                                  LocalDate endDate) {
         int normalizedLimit = limit <= 0 ? 10 : limit;
-        List<UserCountProjection> counts = schedulingRepository.countByUser(PageRequest.of(0, normalizedLimit));
+        DateRange range = normalizeOptionalRange(startDate, endDate);
+        List<UserCountProjection> counts;
+        if (range.start() == null) {
+            counts = schedulingRepository.countByUser(PageRequest.of(0, normalizedLimit));
+        } else {
+            counts = schedulingRepository.countByUserBetween(range.start(), range.end(),
+                    PageRequest.of(0, normalizedLimit));
+        }
         List<SchedulingUserSummaryDto> result = new ArrayList<>();
         counts.forEach(c -> result.add(new SchedulingUserSummaryDto(
                 c.getUserId(),
@@ -215,9 +271,14 @@ public class SchedulingService {
         return result;
     }
 
-    public List<SchedulingTimelinePointDto> getSchedulingTimeline(int months) {
-        LocalDate startDate = calculateStartDate(months);
-        List<TimelineCountProjection> counts = schedulingRepository.countTimelineFrom(startDate);
+    public List<SchedulingTimelinePointDto> getSchedulingTimeline(LocalDate startDate,
+                                                                   LocalDate endDate) {
+        DateRange range = resolveRangeWithDataset(startDate, endDate);
+        if (range == null) {
+            return List.of();
+        }
+        List<TimelineCountProjection> counts = schedulingRepository
+                .countTimelineBetween(range.start(), range.end());
         List<SchedulingTimelinePointDto> result = new ArrayList<>();
         counts.forEach(c -> result.add(new SchedulingTimelinePointDto(
                 formatYearMonth(c.getYear(), c.getMonth()),
@@ -226,17 +287,22 @@ public class SchedulingService {
         return result;
     }
 
-    public SchedulingCancellationStatsDto getCancellationStats(int months) {
-        LocalDate startDate = calculateStartDate(months);
-        LocalDate endDate = LocalDate.now();
+    public SchedulingCancellationStatsDto getCancellationStats(LocalDate startDate,
+                                                               LocalDate endDate) {
+        DateRange range = resolveRangeWithDataset(startDate, endDate);
+        if (range == null) {
+            return new SchedulingCancellationStatsDto(0, 0L, 0L, 0);
+        }
 
-        long total = schedulingRepository.countByScheduledDateBetween(startDate, endDate);
+        long total = schedulingRepository.countByScheduledDateBetween(range.start(), range.end());
         long cancelled = schedulingRepository.countByScheduledDateBetweenAndCheckinStatus(
-                startDate, endDate, Scheduling.CheckinStatus.CANCELADO);
+                range.start(), range.end(), Scheduling.CheckinStatus.CANCELADO);
         double percentage = total == 0 ? 0 : (cancelled * 100.0) / total;
 
+        int monthsValue = calculateMonthsBetween(range.start(), range.end());
+
         return new SchedulingCancellationStatsDto(
-                normalizeMonths(months), total, cancelled, percentage
+                monthsValue, total, cancelled, percentage
         );
     }
 
@@ -337,21 +403,48 @@ public class SchedulingService {
         return user.getRole() != null && user.getRole().equalsIgnoreCase("ADMIN");
     }
 
-    private LocalDate calculateStartDate(int months) {
-        int normalizedMonths = normalizeMonths(months);
-        YearMonth currentMonth = YearMonth.now();
-        YearMonth startMonth = currentMonth.minusMonths(normalizedMonths - 1L);
-        return startMonth.atDay(1);
-    }
-
-    private int normalizeMonths(int months) {
-        return months <= 0 ? 6 : months;
-    }
-
     private String formatYearMonth(Integer year, Integer month) {
         if (year == null || month == null) {
             return "";
         }
         return String.format("%04d-%02d", year, month);
     }
+
+    private DateRange normalizeOptionalRange(LocalDate start, LocalDate end) {
+        if (start == null && end == null) {
+            return new DateRange(null, null);
+        }
+        return requireRange(start, end);
+    }
+
+    private DateRange requireRange(LocalDate start, LocalDate end) {
+        if (start == null || end == null) {
+            throw new IllegalArgumentException("startDate e endDate devem ser informados.");
+        }
+        if (end.isBefore(start)) {
+            throw new IllegalArgumentException("endDate nao pode ser anterior ao startDate.");
+        }
+        return new DateRange(start, end);
+    }
+
+    private DateRange resolveRangeWithDataset(LocalDate start, LocalDate end) {
+        if (start != null || end != null) {
+            return requireRange(start, end);
+        }
+        LocalDate minDate = schedulingRepository.findMinimumScheduledDate();
+        LocalDate maxDate = schedulingRepository.findMaximumScheduledDate();
+        if (minDate == null || maxDate == null) {
+            return null;
+        }
+        return new DateRange(minDate, maxDate);
+    }
+
+    private int calculateMonthsBetween(LocalDate start, LocalDate end) {
+        if (start == null || end == null) {
+            return 0;
+        }
+        return (int) ChronoUnit.MONTHS.between(YearMonth.from(start), YearMonth.from(end)) + 1;
+    }
+
+    private record DateRange(LocalDate start, LocalDate end) {}
 }

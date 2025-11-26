@@ -11,6 +11,7 @@ import com.projeto.demo.entities.Track;
 import com.projeto.demo.exceptions.NullIdException;
 import com.projeto.demo.exceptions.UnauthorizedActionException;
 import com.projeto.demo.repositories.SchedulingRepository;
+import com.projeto.demo.repositories.projections.DateTurnoCountProjection;
 import com.projeto.demo.repositories.projections.PaymentCountProjection;
 import com.projeto.demo.repositories.projections.TimelineCountProjection;
 import com.projeto.demo.repositories.projections.TrackCountProjection;
@@ -21,12 +22,15 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 class SchedulingServiceTest {
@@ -352,7 +356,7 @@ class SchedulingServiceTest {
         TrackCountProjection projection = new SimpleTrackCountProjection(1, "Street", 10L);
         when(schedulingRepository.countByTrack()).thenReturn(List.of(projection));
 
-        var result = schedulingService.getSchedulingSummaryByTrack();
+        var result = schedulingService.getSchedulingSummaryByTrack(null, null);
 
         assertEquals(1, result.size());
         assertEquals(10L, result.get(0).getTotal());
@@ -360,11 +364,22 @@ class SchedulingServiceTest {
     }
 
     @Test
+    void getSchedulingSummaryByTrack_ShouldUseBetweenWhenDatesProvided() {
+        LocalDate start = LocalDate.of(2025, 1, 1);
+        LocalDate end = LocalDate.of(2025, 1, 10);
+        when(schedulingRepository.countByTrackBetween(eq(start), eq(end))).thenReturn(List.of());
+
+        schedulingService.getSchedulingSummaryByTrack(start, end);
+
+        verify(schedulingRepository).countByTrackBetween(eq(start), eq(end));
+    }
+
+    @Test
     void getSchedulingSummaryByPayment_ShouldSupportNulls() {
         PaymentCountProjection projection = new SimplePaymentCountProjection(null, null, 3L);
         when(schedulingRepository.countByPayment()).thenReturn(List.of(projection));
 
-        var result = schedulingService.getSchedulingSummaryByPayment();
+        var result = schedulingService.getSchedulingSummaryByPayment(null, null);
 
         assertEquals(1, result.size());
         assertNull(result.get(0).getPaymentId());
@@ -372,38 +387,141 @@ class SchedulingServiceTest {
     }
 
     @Test
+    void getSchedulingSummaryByPayment_ShouldUseBetweenWhenDatesProvided() {
+        LocalDate start = LocalDate.of(2025, 3, 1);
+        LocalDate end = LocalDate.of(2025, 3, 31);
+        when(schedulingRepository.countByPaymentBetween(eq(start), eq(end))).thenReturn(List.of());
+
+        schedulingService.getSchedulingSummaryByPayment(start, end);
+
+        verify(schedulingRepository).countByPaymentBetween(eq(start), eq(end));
+    }
+
+    @Test
     void getTopUsersByScheduling_ShouldDefaultLimit() {
         UserCountProjection projection = new SimpleUserCountProjection(1L, "User", 4L);
-        when(schedulingRepository.countByUser(any())).thenReturn(List.of(projection));
+        when(schedulingRepository.countByUser(any(Pageable.class))).thenReturn(List.of(projection));
 
-        var result = schedulingService.getTopUsersByScheduling(0);
+        var result = schedulingService.getTopUsersByScheduling(0, null, null);
 
         assertEquals(1, result.size());
         assertEquals(4L, result.get(0).getTotal());
-        verify(schedulingRepository).countByUser(any());
+        verify(schedulingRepository).countByUser(any(Pageable.class));
+    }
+
+    @Test
+    void getTopUsersByScheduling_ShouldUseBetweenWhenDatesProvided() {
+        LocalDate start = LocalDate.of(2025, 2, 1);
+        LocalDate end = LocalDate.of(2025, 2, 28);
+        when(schedulingRepository.countByUserBetween(eq(start), eq(end), any(Pageable.class))).thenReturn(List.of());
+
+        schedulingService.getTopUsersByScheduling(5, start, end);
+
+        verify(schedulingRepository).countByUserBetween(eq(start), eq(end), any(Pageable.class));
     }
 
     @Test
     void getSchedulingTimeline_ShouldFormatPeriod() {
         TimelineCountProjection projection = new SimpleTimelineCountProjection(2025, 1, 7L);
-        when(schedulingRepository.countTimelineFrom(any())).thenReturn(List.of(projection));
+        LocalDate minDate = LocalDate.of(2025, 1, 1);
+        LocalDate maxDate = LocalDate.of(2025, 2, 28);
+        when(schedulingRepository.findMinimumScheduledDate()).thenReturn(minDate);
+        when(schedulingRepository.findMaximumScheduledDate()).thenReturn(maxDate);
+        when(schedulingRepository.countTimelineBetween(eq(minDate), eq(maxDate))).thenReturn(List.of(projection));
 
-        List<SchedulingTimelinePointDto> result = schedulingService.getSchedulingTimeline(6);
+        List<SchedulingTimelinePointDto> result = schedulingService.getSchedulingTimeline(null, null);
 
         assertEquals("2025-01", result.get(0).getPeriod());
-        verify(schedulingRepository).countTimelineFrom(any());
+        verify(schedulingRepository).countTimelineBetween(eq(minDate), eq(maxDate));
+    }
+
+    @Test
+    void getSchedulingTimeline_ShouldUseProvidedRange() {
+        LocalDate start = LocalDate.of(2025, 5, 1);
+        LocalDate end = LocalDate.of(2025, 5, 31);
+        when(schedulingRepository.countTimelineBetween(eq(start), eq(end))).thenReturn(List.of());
+
+        schedulingService.getSchedulingTimeline(start, end);
+
+        verify(schedulingRepository).countTimelineBetween(eq(start), eq(end));
     }
 
     @Test
     void getCancellationStats_ShouldCalculatePercentage() {
-        when(schedulingRepository.countByScheduledDateBetween(any(), any())).thenReturn(20L);
-        when(schedulingRepository.countByScheduledDateBetweenAndCheckinStatus(any(), any(), any()))
+        LocalDate minDate = LocalDate.of(2025, 1, 1);
+        LocalDate maxDate = LocalDate.of(2025, 1, 31);
+        when(schedulingRepository.findMinimumScheduledDate()).thenReturn(minDate);
+        when(schedulingRepository.findMaximumScheduledDate()).thenReturn(maxDate);
+        when(schedulingRepository.countByScheduledDateBetween(eq(minDate), eq(maxDate))).thenReturn(20L);
+        when(schedulingRepository.countByScheduledDateBetweenAndCheckinStatus(eq(minDate), eq(maxDate), any()))
                 .thenReturn(5L);
 
-        SchedulingCancellationStatsDto stats = schedulingService.getCancellationStats(6);
+        SchedulingCancellationStatsDto stats = schedulingService.getCancellationStats(null, null);
 
         assertEquals(25.0, stats.getPercentage());
         assertEquals(5L, stats.getCancelled());
+        verify(schedulingRepository).countByScheduledDateBetween(eq(minDate), eq(maxDate));
+    }
+
+    @Test
+    void getCancellationStats_ShouldUseProvidedRange() {
+        LocalDate start = LocalDate.of(2025, 4, 1);
+        LocalDate end = LocalDate.of(2025, 4, 30);
+        when(schedulingRepository.countByScheduledDateBetween(eq(start), eq(end))).thenReturn(10L);
+        when(schedulingRepository.countByScheduledDateBetweenAndCheckinStatus(eq(start), eq(end), any()))
+                .thenReturn(2L);
+
+        SchedulingCancellationStatsDto stats = schedulingService.getCancellationStats(start, end);
+
+        assertEquals(20.0, stats.getPercentage());
+        verify(schedulingRepository).countByScheduledDateBetween(eq(start), eq(end));
+    }
+
+    @Test
+    void getSchedulingSummaryByDayRange_ShouldBuildForEachDay() {
+        DateTurnoCountProjection projection = new SimpleDateTurnoCountProjection(LocalDate.now(),
+                Scheduling.Turno.MATUTINO, 2L);
+        when(schedulingRepository.countByDateRangeGroupedByTurno(any(), any()))
+                .thenReturn(List.of(projection));
+
+        var result = schedulingService.getSchedulingSummaryByDayRange(LocalDate.now(), LocalDate.now());
+
+        assertEquals(1, result.size());
+        assertEquals(3, result.get(0).getTurnos().size());
+    }
+
+    @Test
+    void getSchedulingSummaryByDayRange_ShouldUseAllDataWhenNoDates() {
+        LocalDate first = LocalDate.of(2025, 1, 1);
+        LocalDate second = LocalDate.of(2025, 1, 2);
+        DateTurnoCountProjection p1 = new SimpleDateTurnoCountProjection(first, Scheduling.Turno.MATUTINO, 1L);
+        DateTurnoCountProjection p2 = new SimpleDateTurnoCountProjection(second, Scheduling.Turno.MATUTINO, 2L);
+        when(schedulingRepository.findMinimumScheduledDate()).thenReturn(first);
+        when(schedulingRepository.findMaximumScheduledDate()).thenReturn(second);
+        when(schedulingRepository.countByDateRangeGroupedByTurno(eq(first), eq(second)))
+                .thenReturn(List.of(p1, p2));
+
+        var result = schedulingService.getSchedulingSummaryByDayRange(null, null);
+
+        assertEquals(2, result.size());
+        verify(schedulingRepository).countByDateRangeGroupedByTurno(eq(first), eq(second));
+    }
+
+    @Test
+    void getSchedulingSummaryByDayRange_ShouldReturnEmptyWhenNoData() {
+        when(schedulingRepository.findMinimumScheduledDate()).thenReturn(null);
+        when(schedulingRepository.findMaximumScheduledDate()).thenReturn(null);
+
+        var result = schedulingService.getSchedulingSummaryByDayRange(null, null);
+
+        assertTrue(result.isEmpty());
+        verify(schedulingRepository, never()).countByDateRangeGroupedByTurno(any(), any());
+    }
+
+    @Test
+    void getSchedulingSummaryByTrack_ShouldRequireBothDates() {
+        assertThrows(IllegalArgumentException.class,
+                () -> schedulingService.getSchedulingSummaryByTrack(LocalDate.now(), null));
     }
 
     private static class SimpleTurnoCountProjection implements TurnoCountProjection {
@@ -526,6 +644,33 @@ class SchedulingServiceTest {
         @Override
         public Integer getMonth() {
             return month;
+        }
+
+        @Override
+        public Long getTotal() {
+            return total;
+        }
+    }
+
+    private static class SimpleDateTurnoCountProjection implements DateTurnoCountProjection {
+        private final LocalDate date;
+        private final Scheduling.Turno turno;
+        private final Long total;
+
+        private SimpleDateTurnoCountProjection(LocalDate date, Scheduling.Turno turno, Long total) {
+            this.date = date;
+            this.turno = turno;
+            this.total = total;
+        }
+
+        @Override
+        public LocalDate getDate() {
+            return date;
+        }
+
+        @Override
+        public Scheduling.Turno getTurno() {
+            return turno;
         }
 
         @Override

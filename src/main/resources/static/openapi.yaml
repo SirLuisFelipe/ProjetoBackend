@@ -530,6 +530,19 @@ paths:
       operationId: getSchedulingSummaryByTrack
       security:
         - bearerAuth: []
+      parameters:
+        - in: query
+          name: startDate
+          required: false
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: endDate
+          required: false
+          schema:
+            type: string
+            format: date
       responses:
         '200':
           description: Totais por pista retornados com sucesso
@@ -550,6 +563,19 @@ paths:
       operationId: getSchedulingSummaryByPayment
       security:
         - bearerAuth: []
+      parameters:
+        - in: query
+          name: startDate
+          required: false
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: endDate
+          required: false
+          schema:
+            type: string
+            format: date
       responses:
         '200':
           description: Totais por pagamento retornados com sucesso
@@ -577,6 +603,18 @@ paths:
           schema:
             type: integer
             default: 10
+        - in: query
+          name: startDate
+          required: false
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: endDate
+          required: false
+          schema:
+            type: string
+            format: date
       responses:
         '200':
           description: Totais por usuário retornados com sucesso
@@ -599,11 +637,17 @@ paths:
         - bearerAuth: []
       parameters:
         - in: query
-          name: months
+          name: startDate
           required: false
           schema:
-            type: integer
-            default: 6
+            type: string
+            format: date
+        - in: query
+          name: endDate
+          required: false
+          schema:
+            type: string
+            format: date
       responses:
         '200':
           description: Timeline retornada com sucesso
@@ -620,17 +664,23 @@ paths:
     get:
       tags:
         - Scheduling Analytics
-      summary: Retorna o percentual de cancelamentos nos últimos meses
+      summary: Retorna o percentual de cancelamentos no período informado
       operationId: getSchedulingCancellationStats
       security:
         - bearerAuth: []
       parameters:
         - in: query
-          name: months
+          name: startDate
           required: false
           schema:
-            type: integer
-            default: 6
+            type: string
+            format: date
+        - in: query
+          name: endDate
+          required: false
+          schema:
+            type: string
+            format: date
       responses:
         '200':
           description: Percentual de cancelamentos retornado com sucesso
@@ -638,6 +688,39 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SchedulingCancellationStats'
+        '500':
+          description: Server error
+
+  /scheduling/analytics/day-range:
+    get:
+      tags:
+        - Scheduling Analytics
+      summary: Retorna o resumo diário por turno em um intervalo
+      operationId: getSchedulingSummaryByDayRange
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: startDate
+          required: false
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: endDate
+          required: false
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Resumo diário retornado com sucesso
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SchedulingDaySummary'
         '500':
           description: Server error
 
