@@ -70,6 +70,16 @@ class SchedulingControllerTest {
     }
 
     @Test
+    void listSchedulings_ShouldReturnAll() {
+        when(schedulingService.listSchedulings()).thenReturn(List.of(new Scheduling()));
+
+        ResponseEntity<?> response = controllerSpy.listSchedulings();
+
+        assertEquals(1, ((List<?>) response.getBody()).size());
+        verify(schedulingService).listSchedulings();
+    }
+
+    @Test
     void deleteScheduling_ShouldCallService() {
         ResponseEntity<?> response = controllerSpy.deleteScheduling(5L);
 

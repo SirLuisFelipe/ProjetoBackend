@@ -54,4 +54,55 @@ class ReservationAnalyticsControllerTest {
 
         assertEquals(result, response.getBody());
     }
+
+    @Test
+    void getDailySummaryRange_ShouldReturnWhenAdmin() {
+        doReturn(true).when(controllerSpy).isAdmin();
+        when(schedulingService.getSchedulingSummaryByDayRange(null, null)).thenReturn(List.of());
+
+        ResponseEntity<?> response = controllerSpy.getDailySummaryRange(null, null);
+
+        assertEquals(List.of(), response.getBody());
+    }
+
+    @Test
+    void getSummaryByTrack_ShouldReturnWhenAdmin() {
+        doReturn(true).when(controllerSpy).isAdmin();
+        when(schedulingService.getSchedulingSummaryByTrack(null, null)).thenReturn(List.of());
+
+        ResponseEntity<?> response = controllerSpy.getSummaryByTrack(null, null);
+
+        assertEquals(List.of(), response.getBody());
+    }
+
+    @Test
+    void getSummaryByUser_ShouldReturnRanking() {
+        doReturn(true).when(controllerSpy).isAdmin();
+        when(schedulingService.getTopUsersByScheduling(5, null, null)).thenReturn(List.of());
+
+        ResponseEntity<?> response = controllerSpy.getSummaryByUser(5, null, null);
+
+        assertEquals(List.of(), response.getBody());
+    }
+
+    @Test
+    void getTimeline_ShouldReturnPoints() {
+        doReturn(true).when(controllerSpy).isAdmin();
+        when(schedulingService.getSchedulingTimeline(null, null)).thenReturn(List.of());
+
+        ResponseEntity<?> response = controllerSpy.getTimeline(null, null);
+
+        assertEquals(List.of(), response.getBody());
+    }
+
+    @Test
+    void getCancellationStats_ShouldReturnStats() {
+        doReturn(true).when(controllerSpy).isAdmin();
+        var stats = new com.projeto.demo.dto.SchedulingCancellationStatsDto(1, 10L, 2L, 20);
+        when(schedulingService.getCancellationStats(null, null)).thenReturn(stats);
+
+        ResponseEntity<?> response = controllerSpy.getCancellationStats(null, null);
+
+        assertEquals(stats, response.getBody());
+    }
 }

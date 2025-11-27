@@ -63,4 +63,25 @@ class UserControllerTest {
         assertEquals(200, response.getStatusCode().value());
         verify(userService).deleteById(5L);
     }
+
+    @Test
+    void searchUsers_ShouldReturnResult() {
+        when(userService.searchUsersByName("ana")).thenReturn(List.of(new User()));
+
+        ResponseEntity<?> response = controllerSpy.searchUsers("ana");
+
+        assertEquals(1, ((List<?>) response.getBody()).size());
+        verify(userService).searchUsersByName("ana");
+    }
+
+    @Test
+    void findById_ShouldReturnUser() {
+        User user = new User();
+        when(userService.findById(3L)).thenReturn(user);
+
+        ResponseEntity<?> response = controllerSpy.findById(3L);
+
+        assertEquals(user, response.getBody());
+        verify(userService).findById(3L);
+    }
 }
