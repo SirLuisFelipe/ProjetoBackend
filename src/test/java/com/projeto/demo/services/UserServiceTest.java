@@ -14,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -89,5 +90,47 @@ class UserServiceTest {
         when(userRepository.findById(id)).thenReturn(Optional.empty());
 
         assertThrows(UserNotFoundException.class, () -> userService.findById(id));
+    }
+
+    @Test
+    void searchUsersByName_ShouldDelegateToRepository() {
+        when(userRepository.findByNameContainingIgnoreCase("ana"))
+                .thenReturn(List.of(new User()));
+
+        assertEquals(1, userService.searchUsersByName("ana").size());
+        verify(userRepository).findByNameContainingIgnoreCase("ana");
+    }
+
+    @Test
+    void listUsers_ShouldReturnAll() {
+        when(userRepository.findAll()).thenReturn(List.of(new User()));
+
+        assertEquals(1, userService.listUsers().size());
+        verify(userRepository).findAll();
+    }
+
+    @Test
+    void findByEmail_ShouldReturnUser() {
+        User user = new User();
+        when(userRepository.findByEmail("test")).thenReturn(Optional.of(user));
+
+        assertEquals(user, userService.findByEmail("test"));
+    }
+
+    @Test
+    void findByEmail_ShouldThrow_WhenNotFound() {
+        when(userRepository.findByEmail("test")).thenReturn(Optional.empty());
+
+        assertThrows(UserNotFoundException.class, () -> userService.findByEmail("test"));
+    }
+
+    @Test
+    void deleteById_ShouldRemoveExistingUser() {
+        User user = new User();
+        when(userRepository.findById(5L)).thenReturn(Optional.of(user));
+
+        userService.deleteById(5L);
+
+        verify(userRepository).delete(user);
     }
 }

@@ -34,4 +34,12 @@ class TrackServiceTest {
 
         assertThrows(TrackNotFoundException.class, () -> trackService.findTrackById(id));
     }
+
+    @Test
+    void listTracks_ShouldReturnRepositoryResult() {
+        when(trackRepository.findAll()).thenReturn(java.util.List.of(new Track()));
+
+        assertEquals(1, trackService.listTracks().size());
+        verify(trackRepository).findAll();
+    }
 }
