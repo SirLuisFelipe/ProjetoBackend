@@ -155,7 +155,7 @@ class SchedulingServiceTest {
         when(schedulingRepository.countByScheduledDateAndTurno(
                 date, Scheduling.Turno.MATUTINO)).thenReturn(10L);
 
-        assertTrue(schedulingService.checkAvailability(2L, date, Scheduling.Turno.MATUTINO));
+        assertTrue(schedulingService.checkAvailability(date, Scheduling.Turno.MATUTINO));
     }
 
     @Test
@@ -164,7 +164,7 @@ class SchedulingServiceTest {
         when(schedulingRepository.countByScheduledDateAndTurno(
                 date, Scheduling.Turno.MATUTINO)).thenReturn(25L);
 
-        assertFalse(schedulingService.checkAvailability(2L, date, Scheduling.Turno.MATUTINO));
+        assertFalse(schedulingService.checkAvailability(date, Scheduling.Turno.MATUTINO));
     }
 
     @Test
@@ -329,14 +329,14 @@ class SchedulingServiceTest {
         CreateSchedulingDto dto = new CreateSchedulingDto();
         dto.setId(1L);
         dto.setUserId(owner.getId());
-        dto.setTrackId(track.getId().longValue());
+        dto.setTrackId(track.getId());
         dto.setScheduledDate(LocalDate.now());
         dto.setTurno("MATUTINO");
         dto.setCheckinStatus("REALIZADO");
 
         when(schedulingRepository.findById(1L)).thenReturn(Optional.of(existing));
         when(userService.findById(owner.getId())).thenReturn(owner);
-        when(trackService.findTrackById(track.getId().longValue())).thenReturn(track);
+        when(trackService.findTrackById(track.getId())).thenReturn(track);
         when(schedulingRepository.save(any(Scheduling.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         Scheduling result = schedulingService.updateScheduling(dto, owner);
@@ -364,14 +364,14 @@ class SchedulingServiceTest {
         CreateSchedulingDto dto = new CreateSchedulingDto();
         dto.setId(1L);
         dto.setUserId(owner.getId());
-        dto.setTrackId(track.getId().longValue());
+        dto.setTrackId(track.getId());
         dto.setScheduledDate(LocalDate.now());
         dto.setTurno("MATUTINO");
         dto.setCheckinStatus("REALIZADO");
 
         when(schedulingRepository.findById(1L)).thenReturn(Optional.of(existing));
         when(userService.findById(owner.getId())).thenReturn(owner);
-        when(trackService.findTrackById(track.getId().longValue())).thenReturn(track);
+        when(trackService.findTrackById(track.getId())).thenReturn(track);
 
         assertThrows(UnauthorizedActionException.class,
                 () -> schedulingService.updateScheduling(dto, null));

@@ -61,7 +61,7 @@ public class SchedulingService {
     /**
      * Verifica se ainda há vagas disponíveis em um determinado dia e turno.
      */
-    public boolean checkAvailability(Long trackId, LocalDate date, Scheduling.Turno turno) {
+    public boolean checkAvailability(LocalDate date, Scheduling.Turno turno) {
         long qty = schedulingRepository
                 .countByScheduledDateAndTurno(date, turno);
         return qty < CAPACIDADE_POR_TURNO;
@@ -76,7 +76,7 @@ public class SchedulingService {
 
         Scheduling.Turno turnoEnum = Scheduling.Turno.valueOf(dto.getTurno().toUpperCase());
 
-        if (!checkAvailability(dto.getTrackId(), dto.getScheduledDate(), turnoEnum)) {
+        if (!checkAvailability(dto.getScheduledDate(), turnoEnum)) {
             throw new IllegalStateException("Capacidade máxima atingida para este dia/turno.");
         }
 
@@ -116,8 +116,8 @@ public class SchedulingService {
         boolean mudouData = !scheduling.getScheduledDate().equals(dto.getScheduledDate());
         boolean mudouTurno = !scheduling.getTurno().equals(turnoEnum);
 
-        if (mudouPista || mudouData || mudouTurno) {
-            if (!checkAvailability(dto.getTrackId(), dto.getScheduledDate(), turnoEnum)) {
+        if (mudouData || mudouTurno) {
+            if (!checkAvailability(dto.getScheduledDate(), turnoEnum)) {
                 throw new IllegalStateException("Capacidade máxima atingida para este dia/turno.");
             }
         }
