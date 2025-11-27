@@ -28,18 +28,6 @@ class TrackServiceTest {
     }
 
     @Test
-    void createTrack_ShouldSaveTrack() {
-        Track track = new Track();
-        track.setName("Test Track");
-
-        when(trackRepository.save(any(Track.class))).thenReturn(track);
-
-        Track result = trackService.createTrack("Test Track");
-        assertNotNull(result);
-        verify(trackRepository, times(1)).save(any(Track.class));
-    }
-
-    @Test
     void findTrackById_ShouldThrowException_WhenNotFound() {
         Long id = 1L;
         when(trackRepository.findById(id)).thenReturn(Optional.empty());

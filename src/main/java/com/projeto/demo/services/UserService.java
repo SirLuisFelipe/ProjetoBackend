@@ -89,17 +89,8 @@ public class UserService {
         return userRepository.findById(id).orElseThrow(UserNotFoundException::new);
     }
 
-    public User findByCpf(String cpf) {
-        return userRepository.findByCpf(cpf).orElseThrow(UserNotFoundException::new);
-    }
-
     public User findByEmail(String email) {
         return userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
-    }
-
-    public void deleteByCpf(String cpf) {
-        User user = findByCpf(cpf);
-        userRepository.delete(user);
     }
 
     public void deleteById(Long id) {

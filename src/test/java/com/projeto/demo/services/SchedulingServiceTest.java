@@ -9,7 +9,9 @@ import com.projeto.demo.entities.User;
 import com.projeto.demo.entities.Payment;
 import com.projeto.demo.entities.Track;
 import com.projeto.demo.exceptions.NullIdException;
+import com.projeto.demo.exceptions.SchedulingNotFoundException;
 import com.projeto.demo.exceptions.UnauthorizedActionException;
+import com.projeto.demo.repositories.PaymentRepository;
 import com.projeto.demo.repositories.SchedulingRepository;
 import com.projeto.demo.repositories.projections.DateTurnoCountProjection;
 import com.projeto.demo.repositories.projections.PaymentCountProjection;
@@ -42,7 +44,7 @@ class SchedulingServiceTest {
     private UserService userService;
 
     @Mock
-    private PaymentService paymentService;
+    private PaymentRepository paymentRepository;
 
     @Mock
     private TrackService trackService;
@@ -69,7 +71,7 @@ class SchedulingServiceTest {
         Track track = new Track();
 
         when(userService.findById(dto.getUserId())).thenReturn(user);
-        when(paymentService.findPaymentById(dto.getPaymentId())).thenReturn(payment);
+        when(paymentRepository.findById(dto.getPaymentId())).thenReturn(Optional.of(payment));
         when(trackService.findTrackById(dto.getTrackId())).thenReturn(track);
 
         Scheduling scheduling = new Scheduling();
@@ -110,6 +112,59 @@ class SchedulingServiceTest {
 
         assertThrows(IllegalStateException.class, () -> schedulingService.deleteScheduling(1L));
         verify(schedulingRepository, never()).delete(any());
+    }
+
+    @Test
+    void findSchedulingById_ShouldReturnScheduling() {
+        Scheduling scheduling = new Scheduling();
+        when(schedulingRepository.findById(1L)).thenReturn(Optional.of(scheduling));
+
+        Scheduling result = schedulingService.findSchedulingById(1L);
+
+        assertEquals(scheduling, result);
+    }
+
+    @Test
+    void findSchedulingById_ShouldThrowException_WhenNotFound() {
+        when(schedulingRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(SchedulingNotFoundException.class, () -> schedulingService.findSchedulingById(1L));
+    }
+
+    @Test
+    void listSchedulings_ShouldReturnAll() {
+        Scheduling scheduling = new Scheduling();
+        when(schedulingRepository.findAll()).thenReturn(List.of(scheduling));
+
+        assertEquals(1, schedulingService.listSchedulings().size());
+        verify(schedulingRepository).findAll();
+    }
+
+    @Test
+    void listSchedulingsByUserId_ShouldReturnUserSchedules() {
+        Scheduling scheduling = new Scheduling();
+        when(schedulingRepository.findByUserId(5L)).thenReturn(List.of(scheduling));
+
+        assertEquals(1, schedulingService.listSchedulingsByUserId(5L).size());
+        verify(schedulingRepository).findByUserId(5L);
+    }
+
+    @Test
+    void checkAvailability_ShouldReturnTrueWhenCapacityNotReached() {
+        LocalDate date = LocalDate.of(2025, 1, 1);
+        when(schedulingRepository.countByScheduledDateAndTurno(
+                date, Scheduling.Turno.MATUTINO)).thenReturn(10L);
+
+        assertTrue(schedulingService.checkAvailability(2L, date, Scheduling.Turno.MATUTINO));
+    }
+
+    @Test
+    void checkAvailability_ShouldReturnFalseWhenCapacityReached() {
+        LocalDate date = LocalDate.of(2025, 1, 1);
+        when(schedulingRepository.countByScheduledDateAndTurno(
+                date, Scheduling.Turno.MATUTINO)).thenReturn(25L);
+
+        assertFalse(schedulingService.checkAvailability(2L, date, Scheduling.Turno.MATUTINO));
     }
 
     @Test
@@ -261,7 +316,7 @@ class SchedulingServiceTest {
         owner.setRole("USER");
 
         Track track = new Track();
-        track.setId(10);
+        track.setId(10L);
 
         Scheduling existing = new Scheduling();
         existing.setId(1L);
@@ -297,7 +352,7 @@ class SchedulingServiceTest {
         owner.setRole("USER");
 
         Track track = new Track();
-        track.setId(10);
+        track.setId(10L);
 
         Scheduling existing = new Scheduling();
         existing.setId(1L);
@@ -353,7 +408,7 @@ class SchedulingServiceTest {
 
     @Test
     void getSchedulingSummaryByTrack_ShouldMapResults() {
-        TrackCountProjection projection = new SimpleTrackCountProjection(1, "Street", 10L);
+        TrackCountProjection projection = new SimpleTrackCountProjection(1L, "Street", 10L);
         when(schedulingRepository.countByTrack()).thenReturn(List.of(projection));
 
         var result = schedulingService.getSchedulingSummaryByTrack(null, null);
@@ -545,18 +600,18 @@ class SchedulingServiceTest {
     }
 
     private static class SimpleTrackCountProjection implements TrackCountProjection {
-        private final Integer trackId;
+        private final Long trackId;
         private final String trackName;
         private final Long total;
 
-        private SimpleTrackCountProjection(Integer trackId, String trackName, Long total) {
+        private SimpleTrackCountProjection(Long trackId, String trackName, Long total) {
             this.trackId = trackId;
             this.trackName = trackName;
             this.total = total;
         }
 
         @Override
-        public Integer getTrackId() {
+        public Long getTrackId() {
             return trackId;
         }
 

@@ -13,8 +13,10 @@ import com.projeto.demo.entities.Scheduling;
 import com.projeto.demo.entities.Track;
 import com.projeto.demo.entities.User;
 import com.projeto.demo.exceptions.NullIdException;
+import com.projeto.demo.exceptions.PaymentNotFoundException;
 import com.projeto.demo.exceptions.SchedulingNotFoundException;
 import com.projeto.demo.exceptions.UnauthorizedActionException;
+import com.projeto.demo.repositories.PaymentRepository;
 import com.projeto.demo.repositories.SchedulingRepository;
 import com.projeto.demo.repositories.projections.DateTurnoCountProjection;
 import com.projeto.demo.repositories.projections.PaymentCountProjection;
@@ -48,7 +50,7 @@ public class SchedulingService {
     private UserService userService;
 
     @Autowired
-    private PaymentService paymentService;
+    private PaymentRepository paymentRepository;
 
     @Autowired
     private TrackService trackService;
@@ -61,7 +63,7 @@ public class SchedulingService {
      */
     public boolean checkAvailability(Long trackId, LocalDate date, Scheduling.Turno turno) {
         long qty = schedulingRepository
-                .countByTrack_IdAndScheduledDateAndTurno(trackId, date, turno);
+                .countByScheduledDateAndTurno(date, turno);
         return qty < CAPACIDADE_POR_TURNO;
     }
 
@@ -80,9 +82,7 @@ public class SchedulingService {
 
         User user = userService.findById(dto.getUserId());
         Track track = trackService.findTrackById(dto.getTrackId());
-        Payment payment = (dto.getPaymentId() != null)
-                ? paymentService.findPaymentById(dto.getPaymentId())
-                : null;
+        Payment payment = resolvePayment(dto.getPaymentId());
 
         Scheduling scheduling = new Scheduling();
         scheduling.setUser(user);
@@ -110,9 +110,7 @@ public class SchedulingService {
         Scheduling.Turno turnoEnum = Scheduling.Turno.valueOf(dto.getTurno().toUpperCase());
 
         // Se mudar a combinação de pista + data + turno, precisa checar disponibilidade
-        Long scheduledTrackId = scheduling.getTrack().getId() == null
-                ? null
-                : scheduling.getTrack().getId().longValue();
+        Long scheduledTrackId = scheduling.getTrack().getId();
         boolean mudouPista = scheduledTrackId == null
                 || !scheduledTrackId.equals(dto.getTrackId());
         boolean mudouData = !scheduling.getScheduledDate().equals(dto.getScheduledDate());
@@ -126,9 +124,7 @@ public class SchedulingService {
 
         User user = userService.findById(dto.getUserId());
         Track track = trackService.findTrackById(dto.getTrackId());
-        Payment payment = (dto.getPaymentId() != null)
-                ? paymentService.findPaymentById(dto.getPaymentId())
-                : null;
+        Payment payment = resolvePayment(dto.getPaymentId());
 
         scheduling.setUser(user);
         scheduling.setTrack(track);
@@ -162,10 +158,6 @@ public class SchedulingService {
 
     public List<Scheduling> listSchedulingsByUserId(Long userId) {
         return schedulingRepository.findByUserId(userId);
-    }
-
-    public List<Scheduling> listSchedulingsByTrackId(Long trackId) {
-        return schedulingRepository.findByTrackId(trackId);
     }
 
     public SchedulingDaySummaryDto getSchedulingSummaryByDay(LocalDate date) {
@@ -444,6 +436,14 @@ public class SchedulingService {
             return 0;
         }
         return (int) ChronoUnit.MONTHS.between(YearMonth.from(start), YearMonth.from(end)) + 1;
+    }
+
+    private Payment resolvePayment(Long paymentId) {
+        if (paymentId == null) {
+            return null;
+        }
+        return paymentRepository.findById(paymentId)
+                .orElseThrow(PaymentNotFoundException::new);
     }
 
     private record DateRange(LocalDate start, LocalDate end) {}

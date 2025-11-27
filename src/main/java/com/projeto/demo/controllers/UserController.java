@@ -53,15 +53,6 @@ public class UserController extends BaseController {
         }
     }
 
-    @GetMapping("/cpf/{cpf}")
-    public ResponseEntity<?> findByCpf(@PathVariable String cpf) {
-        try {
-            return ResponseEntity.ok(userService.findByCpf(cpf));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
-    }
-
     @DeleteMapping("/id/{id}")
     public ResponseEntity<Object> deleteById(@PathVariable Long id) {
         try {
@@ -76,17 +67,4 @@ public class UserController extends BaseController {
         }
     }
 
-    @DeleteMapping("/cpf/{cpf}")
-    public ResponseEntity<Object> deleteByCpf(@PathVariable String cpf) {
-        try {
-            if (!isAdmin()) {
-                throw new UnauthorizedActionException();
-            }
-
-            userService.deleteByCpf(cpf);
-            return ResponseEntity.ok().build();
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
-    }
 }

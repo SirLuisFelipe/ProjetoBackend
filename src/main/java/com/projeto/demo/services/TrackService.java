@@ -14,13 +14,6 @@ public class TrackService {
     @Autowired
     private TrackRepository trackRepository;
 
-    public Track createTrack(String name) {
-        Track track = new Track();
-        track.setName(name);
-
-        return trackRepository.save(track);
-    }
-
     public List<Track> listTracks() {
         return trackRepository.findAll();
     }
@@ -29,8 +22,4 @@ public class TrackService {
         return trackRepository.findById(id).orElseThrow(TrackNotFoundException::new);
     }
 
-    public void deleteTrack(Long id) {
-        Track track = findTrackById(id);
-        trackRepository.delete(track);
-    }
 }

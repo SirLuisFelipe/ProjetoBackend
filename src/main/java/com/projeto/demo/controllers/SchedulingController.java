@@ -50,24 +50,6 @@ public class SchedulingController extends BaseController {
         }
     }
 
-    @GetMapping("/track/{trackId}")
-    public ResponseEntity<?> listSchedulingsByTrack(@PathVariable Long trackId) {
-        try {
-            return ResponseEntity.ok(schedulingService.listSchedulingsByTrackId(trackId));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<?> findSchedulingById(@PathVariable Long id) {
-        try {
-            return ResponseEntity.ok(schedulingService.findSchedulingById(id));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
-    }
-
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteScheduling(@PathVariable Long id) {
         try {

@@ -7,7 +7,7 @@ import lombok.Data;
 @AllArgsConstructor
 public class SchedulingTrackSummaryDto {
 
-    private Integer trackId;
+    private Long trackId;
     private String trackName;
     private Long total;
 }
