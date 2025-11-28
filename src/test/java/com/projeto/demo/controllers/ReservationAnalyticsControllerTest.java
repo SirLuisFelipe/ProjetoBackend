@@ -45,6 +45,16 @@ class ReservationAnalyticsControllerTest {
     }
 
     @Test
+    void getDailySummary_ShouldHandleException() {
+        when(schedulingService.getSchedulingSummaryByDay(LocalDate.now()))
+                .thenThrow(new RuntimeException("fail"));
+
+        ResponseEntity<?> response = controllerSpy.getDailySummary(LocalDate.now());
+
+        assertEquals(500, response.getStatusCode().value());
+    }
+
+    @Test
     void getSummaryByPayment_ShouldRequireAdmin() {
         doReturn(true).when(controllerSpy).isAdmin();
         List<SchedulingPaymentSummaryDto> result = List.of(new SchedulingPaymentSummaryDto(1L, "Pix", 2L));
@@ -76,6 +86,24 @@ class ReservationAnalyticsControllerTest {
     }
 
     @Test
+    void getSummaryByTrack_ShouldReturnForbiddenWhenNotAdmin() {
+        doReturn(false).when(controllerSpy).isAdmin();
+
+        ResponseEntity<?> response = controllerSpy.getSummaryByTrack(null, null);
+
+        assertEquals(403, response.getStatusCode().value());
+    }
+
+    @Test
+    void getDailySummaryRange_ShouldReturnForbiddenWhenNotAdmin() {
+        doReturn(false).when(controllerSpy).isAdmin();
+
+        ResponseEntity<?> response = controllerSpy.getDailySummaryRange(null, null);
+
+        assertEquals(403, response.getStatusCode().value());
+    }
+
+    @Test
     void getSummaryByUser_ShouldReturnRanking() {
         doReturn(true).when(controllerSpy).isAdmin();
         when(schedulingService.getTopUsersByScheduling(5, null, null)).thenReturn(List.of());
@@ -83,6 +111,17 @@ class ReservationAnalyticsControllerTest {
         ResponseEntity<?> response = controllerSpy.getSummaryByUser(5, null, null);
 
         assertEquals(List.of(), response.getBody());
+    }
+
+    @Test
+    void getSummaryByUser_ShouldReturnErrorWhenServiceFails() {
+        doReturn(true).when(controllerSpy).isAdmin();
+        when(schedulingService.getTopUsersByScheduling(5, null, null))
+                .thenThrow(new RuntimeException("error"));
+
+        ResponseEntity<?> response = controllerSpy.getSummaryByUser(5, null, null);
+
+        assertEquals(500, response.getStatusCode().value());
     }
 
     @Test
@@ -96,6 +135,15 @@ class ReservationAnalyticsControllerTest {
     }
 
     @Test
+    void getTimeline_ShouldReturnForbiddenWhenNotAdmin() {
+        doReturn(false).when(controllerSpy).isAdmin();
+
+        ResponseEntity<?> response = controllerSpy.getTimeline(null, null);
+
+        assertEquals(403, response.getStatusCode().value());
+    }
+
+    @Test
     void getCancellationStats_ShouldReturnStats() {
         doReturn(true).when(controllerSpy).isAdmin();
         var stats = new com.projeto.demo.dto.SchedulingCancellationStatsDto(1, 10L, 2L, 20);
@@ -104,5 +152,14 @@ class ReservationAnalyticsControllerTest {
         ResponseEntity<?> response = controllerSpy.getCancellationStats(null, null);
 
         assertEquals(stats, response.getBody());
+    }
+
+    @Test
+    void getCancellationStats_ShouldReturnForbiddenWhenNotAdmin() {
+        doReturn(false).when(controllerSpy).isAdmin();
+
+        ResponseEntity<?> response = controllerSpy.getCancellationStats(null, null);
+
+        assertEquals(403, response.getStatusCode().value());
     }
 }
