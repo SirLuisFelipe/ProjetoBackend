@@ -575,8 +575,9 @@ class SchedulingServiceTest {
 
     @Test
     void getSchedulingSummaryByTrack_ShouldRequireBothDates() {
+        LocalDate today = LocalDate.now();
         assertThrows(IllegalArgumentException.class,
-                () -> schedulingService.getSchedulingSummaryByTrack(LocalDate.now(), null));
+                () -> schedulingService.getSchedulingSummaryByTrack(today, null));
     }
 
     private static class SimpleTurnoCountProjection implements TurnoCountProjection {

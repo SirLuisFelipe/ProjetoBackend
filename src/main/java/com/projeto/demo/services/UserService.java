@@ -8,7 +8,6 @@ import com.projeto.demo.exceptions.NullIdException;
 import com.projeto.demo.exceptions.UserNotFoundException;
 import com.projeto.demo.repositories.UserRepository;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -18,11 +17,13 @@ import java.util.List;
 @Transactional
 public class UserService {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     public User register(UserRegisterDto userRegisterDto) {
         User user = mapToEntity(userRegisterDto);
