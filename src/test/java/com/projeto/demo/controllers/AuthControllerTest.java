@@ -1,6 +1,7 @@
 package com.projeto.demo.controllers;
 
 import com.projeto.demo.config.JwtTokenProvider;
+import com.projeto.demo.dto.AuthResponseDto;
 import com.projeto.demo.dto.UserLoginDto;
 import com.projeto.demo.dto.UserRegisterDto;
 import com.projeto.demo.entities.User;
@@ -39,9 +40,9 @@ class AuthControllerTest {
         when(userService.register(dto)).thenReturn(user);
         when(jwtTokenProvider.gerarToken(user)).thenReturn("token");
 
-        ResponseEntity<?> response = authController.register(dto);
+        ResponseEntity<AuthResponseDto> response = authController.register(dto);
 
-        assertEquals("token", ((com.projeto.demo.dto.AuthResponseDto) response.getBody()).getToken());
+        assertEquals("token", response.getBody().getToken());
     }
 
     @Test
@@ -52,8 +53,8 @@ class AuthControllerTest {
         when(userService.authenticate(dto)).thenReturn(user);
         when(jwtTokenProvider.gerarToken(user)).thenReturn("token");
 
-        ResponseEntity<?> response = authController.login(dto);
+        ResponseEntity<AuthResponseDto> response = authController.login(dto);
 
-        assertEquals("token", ((com.projeto.demo.dto.AuthResponseDto) response.getBody()).getToken());
+        assertEquals("token", response.getBody().getToken());
     }
 }

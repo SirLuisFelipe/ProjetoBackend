@@ -39,7 +39,7 @@ class SchedulingControllerTest {
         Scheduling scheduling = new Scheduling();
         when(schedulingService.createScheduling(dto)).thenReturn(scheduling);
 
-        ResponseEntity<?> response = controllerSpy.createScheduling(dto);
+        ResponseEntity<Scheduling> response = controllerSpy.createScheduling(dto);
 
         assertEquals(scheduling, response.getBody());
         verify(schedulingService).createScheduling(dto);
@@ -63,7 +63,7 @@ class SchedulingControllerTest {
     void listSchedulingsByUser_ShouldReturnList() {
         when(schedulingService.listSchedulingsByUserId(10L)).thenReturn(List.of());
 
-        ResponseEntity<?> response = controllerSpy.listSchedulingsByUser(10L);
+        ResponseEntity<java.util.List<Scheduling>> response = controllerSpy.listSchedulingsByUser(10L);
 
         assertEquals(List.of(), response.getBody());
         verify(schedulingService).listSchedulingsByUserId(10L);
@@ -73,15 +73,15 @@ class SchedulingControllerTest {
     void listSchedulings_ShouldReturnAll() {
         when(schedulingService.listSchedulings()).thenReturn(List.of(new Scheduling()));
 
-        ResponseEntity<?> response = controllerSpy.listSchedulings();
+        ResponseEntity<java.util.List<Scheduling>> response = controllerSpy.listSchedulings();
 
-        assertEquals(1, ((List<?>) response.getBody()).size());
+        assertEquals(1, response.getBody().size());
         verify(schedulingService).listSchedulings();
     }
 
     @Test
     void deleteScheduling_ShouldCallService() {
-        ResponseEntity<?> response = controllerSpy.deleteScheduling(5L);
+        ResponseEntity<Void> response = controllerSpy.deleteScheduling(5L);
 
         assertEquals(200, response.getStatusCode().value());
         verify(schedulingService).deleteScheduling(5L);

@@ -38,7 +38,7 @@ class UserControllerTest {
         User updated = new User();
         when(userService.update(dto)).thenReturn(updated);
 
-        ResponseEntity<?> response = controllerSpy.update(dto);
+        ResponseEntity<User> response = controllerSpy.update(dto);
 
         assertEquals(updated, response.getBody());
         verify(userService).update(dto);
@@ -48,9 +48,9 @@ class UserControllerTest {
     void listUsers_ShouldReturnFromService() {
         when(userService.listUsers()).thenReturn(List.of(new User()));
 
-        ResponseEntity<?> response = controllerSpy.listUsers();
+        ResponseEntity<List<User>> response = controllerSpy.listUsers();
 
-        assertEquals(1, ((List<?>) response.getBody()).size());
+        assertEquals(1, response.getBody().size());
         verify(userService).listUsers();
     }
 
@@ -58,7 +58,7 @@ class UserControllerTest {
     void deleteById_ShouldRequireAdmin() {
         doReturn(true).when(controllerSpy).isAdmin();
 
-        ResponseEntity<?> response = controllerSpy.deleteById(5L);
+        ResponseEntity<Void> response = controllerSpy.deleteById(5L);
 
         assertEquals(200, response.getStatusCode().value());
         verify(userService).deleteById(5L);
@@ -68,9 +68,9 @@ class UserControllerTest {
     void searchUsers_ShouldReturnResult() {
         when(userService.searchUsersByName("ana")).thenReturn(List.of(new User()));
 
-        ResponseEntity<?> response = controllerSpy.searchUsers("ana");
+        ResponseEntity<List<User>> response = controllerSpy.searchUsers("ana");
 
-        assertEquals(1, ((List<?>) response.getBody()).size());
+        assertEquals(1, response.getBody().size());
         verify(userService).searchUsersByName("ana");
     }
 
@@ -79,7 +79,7 @@ class UserControllerTest {
         User user = new User();
         when(userService.findById(3L)).thenReturn(user);
 
-        ResponseEntity<?> response = controllerSpy.findById(3L);
+        ResponseEntity<User> response = controllerSpy.findById(3L);
 
         assertEquals(user, response.getBody());
         verify(userService).findById(3L);

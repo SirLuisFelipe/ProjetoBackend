@@ -4,6 +4,8 @@ import com.projeto.demo.entities.User;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import jakarta.annotation.PostConstruct;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -14,6 +16,8 @@ import java.util.Map;
 @Component
 public class JwtTokenProvider {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(JwtTokenProvider.class);
+
     @Value("${jwt.secret}")
     private String jwtSecret;
 
@@ -22,8 +26,8 @@ public class JwtTokenProvider {
 
     @PostConstruct
     public void init() {
-        System.out.println("JWT Secret: " + jwtSecret);
-        System.out.println("JWT Expiration: " + jwtExpirationDays);
+        LOGGER.info("JWT Secret initialized.");
+        LOGGER.info("JWT Expiration days: {}", jwtExpirationDays);
     }
 
     public String gerarToken(User user) {

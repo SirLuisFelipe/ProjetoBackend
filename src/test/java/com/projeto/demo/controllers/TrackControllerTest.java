@@ -33,7 +33,7 @@ class TrackControllerTest {
         List<Track> tracks = List.of(new Track());
         when(trackService.listTracks()).thenReturn(tracks);
 
-        ResponseEntity<?> response = trackController.listTracks();
+        ResponseEntity<List<Track>> response = trackController.listTracks();
 
         assertEquals(tracks, response.getBody());
         verify(trackService).listTracks();

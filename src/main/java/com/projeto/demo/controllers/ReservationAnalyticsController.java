@@ -19,21 +19,25 @@ import java.time.LocalDate;
 public class ReservationAnalyticsController extends BaseController {
 
     @Autowired
-    private SchedulingService schedulingService;
+    private final SchedulingService schedulingService;
+
+    public ReservationAnalyticsController(SchedulingService schedulingService) {
+        this.schedulingService = schedulingService;
+    }
 
     @GetMapping("/day")
-    public ResponseEntity<?> getDailySummary(
+    public ResponseEntity<SchedulingDaySummaryDto> getDailySummary(
             @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         try {
             SchedulingDaySummaryDto summary = schedulingService.getSchedulingSummaryByDay(date);
             return ResponseEntity.ok(summary);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
     @GetMapping("/day-range")
-    public ResponseEntity<?> getDailySummaryRange(
+    public ResponseEntity<java.util.List<com.projeto.demo.dto.SchedulingDaySummaryDto>> getDailySummaryRange(
             @RequestParam(value = "startDate", required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(value = "endDate", required = false)
@@ -42,14 +46,14 @@ public class ReservationAnalyticsController extends BaseController {
             ensureAdminUser();
             return ResponseEntity.ok(schedulingService.getSchedulingSummaryByDayRange(startDate, endDate));
         } catch (UnauthorizedActionException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
     @GetMapping("/by-track")
-    public ResponseEntity<?> getSummaryByTrack(
+    public ResponseEntity<java.util.List<com.projeto.demo.dto.SchedulingTrackSummaryDto>> getSummaryByTrack(
             @RequestParam(value = "startDate", required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(value = "endDate", required = false)
@@ -58,14 +62,14 @@ public class ReservationAnalyticsController extends BaseController {
             ensureAdminUser();
             return ResponseEntity.ok(schedulingService.getSchedulingSummaryByTrack(startDate, endDate));
         } catch (UnauthorizedActionException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
     @GetMapping("/by-payment")
-    public ResponseEntity<?> getSummaryByPayment(
+    public ResponseEntity<java.util.List<com.projeto.demo.dto.SchedulingPaymentSummaryDto>> getSummaryByPayment(
             @RequestParam(value = "startDate", required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(value = "endDate", required = false)
@@ -74,14 +78,14 @@ public class ReservationAnalyticsController extends BaseController {
             ensureAdminUser();
             return ResponseEntity.ok(schedulingService.getSchedulingSummaryByPayment(startDate, endDate));
         } catch (UnauthorizedActionException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
     @GetMapping("/by-user")
-    public ResponseEntity<?> getSummaryByUser(
+    public ResponseEntity<java.util.List<com.projeto.demo.dto.SchedulingUserSummaryDto>> getSummaryByUser(
             @RequestParam(value = "limit", defaultValue = "10") int limit,
             @RequestParam(value = "startDate", required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
@@ -91,14 +95,14 @@ public class ReservationAnalyticsController extends BaseController {
             ensureAdminUser();
             return ResponseEntity.ok(schedulingService.getTopUsersByScheduling(limit, startDate, endDate));
         } catch (UnauthorizedActionException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
     @GetMapping("/timeline")
-    public ResponseEntity<?> getTimeline(
+    public ResponseEntity<java.util.List<com.projeto.demo.dto.SchedulingTimelinePointDto>> getTimeline(
             @RequestParam(value = "startDate", required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(value = "endDate", required = false)
@@ -107,14 +111,14 @@ public class ReservationAnalyticsController extends BaseController {
             ensureAdminUser();
             return ResponseEntity.ok(schedulingService.getSchedulingTimeline(startDate, endDate));
         } catch (UnauthorizedActionException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
     @GetMapping("/cancellations")
-    public ResponseEntity<?> getCancellationStats(
+    public ResponseEntity<com.projeto.demo.dto.SchedulingCancellationStatsDto> getCancellationStats(
             @RequestParam(value = "startDate", required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(value = "endDate", required = false)
@@ -123,9 +127,9 @@ public class ReservationAnalyticsController extends BaseController {
             ensureAdminUser();
             return ResponseEntity.ok(schedulingService.getCancellationStats(startDate, endDate));
         } catch (UnauthorizedActionException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
