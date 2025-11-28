@@ -33,7 +33,7 @@ class PaymentControllerTest {
         List<Payment> payments = List.of(new Payment());
         when(paymentService.listPayments()).thenReturn(payments);
 
-        ResponseEntity<?> response = paymentController.listPayments();
+        ResponseEntity<List<Payment>> response = paymentController.listPayments();
 
         assertEquals(payments, response.getBody());
         verify(paymentService).listPayments();

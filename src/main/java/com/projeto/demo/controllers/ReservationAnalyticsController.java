@@ -3,7 +3,6 @@ package com.projeto.demo.controllers;
 import com.projeto.demo.dto.SchedulingDaySummaryDto;
 import com.projeto.demo.exceptions.UnauthorizedActionException;
 import com.projeto.demo.services.SchedulingService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +17,6 @@ import java.time.LocalDate;
 @RequestMapping("/scheduling/analytics")
 public class ReservationAnalyticsController extends BaseController {
 
-    @Autowired
     private final SchedulingService schedulingService;
 
     public ReservationAnalyticsController(SchedulingService schedulingService) {

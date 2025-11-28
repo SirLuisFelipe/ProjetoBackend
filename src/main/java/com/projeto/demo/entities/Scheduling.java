@@ -26,10 +26,6 @@ public class Scheduling {
     @JoinColumn(name = "payment_id")
     private Payment payment;
 
-    // Removendo Colunas antigas
-    //private LocalDateTime scheduledTimeStart;
-    //private LocalDateTime scheduledTimeEnd;
-
     @Column(name = "scheduled_date")
     private LocalDate scheduledDate;
 

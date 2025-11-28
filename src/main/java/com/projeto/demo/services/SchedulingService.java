@@ -24,7 +24,6 @@ import com.projeto.demo.repositories.projections.TimelineCountProjection;
 import com.projeto.demo.repositories.projections.TrackCountProjection;
 import com.projeto.demo.repositories.projections.TurnoCountProjection;
 import com.projeto.demo.repositories.projections.UserCountProjection;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -37,23 +36,25 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
-import java.util.Map;
 import java.util.TreeMap;
 
 @Service
 public class SchedulingService {
 
-    @Autowired
-    private SchedulingRepository schedulingRepository;
+    private final SchedulingRepository schedulingRepository;
+    private final UserService userService;
+    private final PaymentRepository paymentRepository;
+    private final TrackService trackService;
 
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private PaymentRepository paymentRepository;
-
-    @Autowired
-    private TrackService trackService;
+    public SchedulingService(SchedulingRepository schedulingRepository,
+                             UserService userService,
+                             PaymentRepository paymentRepository,
+                             TrackService trackService) {
+        this.schedulingRepository = schedulingRepository;
+        this.userService = userService;
+        this.paymentRepository = paymentRepository;
+        this.trackService = trackService;
+    }
 
     private static final int CAPACIDADE_POR_TURNO = 25;
     private static final String PAST_SCHEDULING_MESSAGE = "Não é possível manipular agendamentos passados.";
@@ -110,16 +111,11 @@ public class SchedulingService {
         Scheduling.Turno turnoEnum = Scheduling.Turno.valueOf(dto.getTurno().toUpperCase());
 
         // Se mudar a combinação de pista + data + turno, precisa checar disponibilidade
-        Long scheduledTrackId = scheduling.getTrack().getId();
-        boolean mudouPista = scheduledTrackId == null
-                || !scheduledTrackId.equals(dto.getTrackId());
         boolean mudouData = !scheduling.getScheduledDate().equals(dto.getScheduledDate());
         boolean mudouTurno = !scheduling.getTurno().equals(turnoEnum);
 
-        if (mudouData || mudouTurno) {
-            if (!checkAvailability(dto.getScheduledDate(), turnoEnum)) {
-                throw new IllegalStateException("Capacidade máxima atingida para este dia/turno.");
-            }
+        if ((mudouData || mudouTurno) && !checkAvailability(dto.getScheduledDate(), turnoEnum)) {
+            throw new IllegalStateException("Capacidade máxima atingida para este dia/turno.");
         }
 
         User user = userService.findById(dto.getUserId());
@@ -305,48 +301,77 @@ public class SchedulingService {
     }
 
     private void applyCheckinStatusChange(Scheduling scheduling, String requestedStatus, User actor) {
+        ensureRequestedStatusProvided(requestedStatus);
+        ensureActorPresent(actor);
+
+        Scheduling.CheckinStatus status = parseCheckinStatus(requestedStatus);
+        LocalDate today = LocalDate.now();
+
+        blockPastCancellations(scheduling, status, today);
+        enforceRoleSpecificRules(scheduling, status, actor, today);
+
+        scheduling.setCheckinStatus(status);
+    }
+
+    private void ensureRequestedStatusProvided(String requestedStatus) {
         if (requestedStatus == null || requestedStatus.isBlank()) {
             throw new IllegalArgumentException("checkinStatus é obrigatório.");
         }
+    }
 
+    private void ensureActorPresent(User actor) {
         if (actor == null) {
             throw new UnauthorizedActionException();
         }
+    }
 
-        LocalDate today = LocalDate.now();
-        LocalDate scheduledDate = scheduling.getScheduledDate();
-        Scheduling.CheckinStatus status = parseCheckinStatus(requestedStatus);
-        boolean isAdmin = isAdmin(actor);
-
-        if (status == Scheduling.CheckinStatus.CANCELADO && scheduledDate.isBefore(today)) {
+    private void blockPastCancellations(Scheduling scheduling, Scheduling.CheckinStatus status, LocalDate today) {
+        if (status == Scheduling.CheckinStatus.CANCELADO && scheduling.getScheduledDate().isBefore(today)) {
             throw new IllegalStateException("Nao e possivel cancelar agendamentos passados.");
         }
+    }
 
-        if (isAdmin) {
-            boolean allowed = status == Scheduling.CheckinStatus.CANCELADO
-                    || status == Scheduling.CheckinStatus.REALIZADO
-                    || status == Scheduling.CheckinStatus.NAO_REALIZADO;
-            if (!allowed) {
-                throw new IllegalStateException(
-                        "Admins so podem definir o status como Cancelado, Realizado ou Nao realizado.");
-            }
-        } else {
-            if (!scheduling.getUser().getId().equals(actor.getId())) {
-                throw new UnauthorizedActionException();
-            }
+    private void enforceRoleSpecificRules(Scheduling scheduling,
+                                          Scheduling.CheckinStatus status,
+                                          User actor,
+                                          LocalDate today) {
+        if (isAdmin(actor)) {
+            validateAdminAllowedStatus(status);
+            return;
+        }
+        ensureOwnership(scheduling, actor);
+        validateUserAllowedStatus(status, scheduling.getScheduledDate(), today);
+    }
 
-            if (status == Scheduling.CheckinStatus.REALIZADO) {
-                if (!scheduledDate.isEqual(today)) {
-                    throw new IllegalStateException("O check-in so pode ser realizado no dia agendado.");
-                }
-            } else if (status == Scheduling.CheckinStatus.CANCELADO) {
-                // Validacao de data ja feita anteriormente
-            } else {
-                throw new IllegalStateException("Usuarios so podem atualizar para Realizado ou Cancelado.");
+    private void validateAdminAllowedStatus(Scheduling.CheckinStatus status) {
+        boolean allowed = status == Scheduling.CheckinStatus.CANCELADO
+                || status == Scheduling.CheckinStatus.REALIZADO
+                || status == Scheduling.CheckinStatus.NAO_REALIZADO;
+        if (!allowed) {
+            throw new IllegalStateException(
+                    "Admins so podem definir o status como Cancelado, Realizado ou Nao realizado.");
+        }
+    }
+
+    private void ensureOwnership(Scheduling scheduling, User actor) {
+        if (!scheduling.getUser().getId().equals(actor.getId())) {
+            throw new UnauthorizedActionException();
+        }
+    }
+
+    private void validateUserAllowedStatus(Scheduling.CheckinStatus status,
+                                           LocalDate scheduledDate,
+                                           LocalDate today) {
+        if (status == Scheduling.CheckinStatus.REALIZADO) {
+            if (!scheduledDate.isEqual(today)) {
+                throw new IllegalStateException("O check-in so pode ser realizado no dia agendado.");
             }
+            return;
         }
 
-        scheduling.setCheckinStatus(status);
+        if (status != Scheduling.CheckinStatus.CANCELADO) {
+            throw new IllegalStateException("Usuarios so podem atualizar para Realizado ou Cancelado.");
+        }
     }
 
     /**
