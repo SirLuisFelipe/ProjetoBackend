@@ -86,4 +86,53 @@ class SchedulingControllerTest {
         assertEquals(200, response.getStatusCode().value());
         verify(schedulingService).deleteScheduling(5L);
     }
+
+    @Test
+    void createScheduling_ShouldReturnServerError_WhenServiceFails() {
+        CreateSchedulingDto dto = new CreateSchedulingDto();
+        when(schedulingService.createScheduling(dto)).thenThrow(new RuntimeException("fail"));
+
+        ResponseEntity<Scheduling> response = controllerSpy.createScheduling(dto);
+
+        assertEquals(500, response.getStatusCode().value());
+    }
+
+    @Test
+    void updateScheduling_ShouldReturnServerError_WhenServiceFails() {
+        CreateSchedulingDto dto = new CreateSchedulingDto();
+        User user = new User();
+        doReturn(user).when(controllerSpy).getLoggedUser();
+        when(schedulingService.updateScheduling(dto, user)).thenThrow(new RuntimeException("fail"));
+
+        ResponseEntity<Scheduling> response = controllerSpy.updateScheduling(dto);
+
+        assertEquals(500, response.getStatusCode().value());
+    }
+
+    @Test
+    void listSchedulings_ShouldReturnServerError_WhenServiceFails() {
+        when(schedulingService.listSchedulings()).thenThrow(new RuntimeException("fail"));
+
+        ResponseEntity<List<Scheduling>> response = controllerSpy.listSchedulings();
+
+        assertEquals(500, response.getStatusCode().value());
+    }
+
+    @Test
+    void listSchedulingsByUser_ShouldReturnServerError_WhenServiceFails() {
+        when(schedulingService.listSchedulingsByUserId(2L)).thenThrow(new RuntimeException("fail"));
+
+        ResponseEntity<List<Scheduling>> response = controllerSpy.listSchedulingsByUser(2L);
+
+        assertEquals(500, response.getStatusCode().value());
+    }
+
+    @Test
+    void deleteScheduling_ShouldReturnServerError_WhenServiceFails() {
+        doThrow(new RuntimeException("fail")).when(schedulingService).deleteScheduling(10L);
+
+        ResponseEntity<Void> response = controllerSpy.deleteScheduling(10L);
+
+        assertEquals(500, response.getStatusCode().value());
+    }
 }

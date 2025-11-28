@@ -39,4 +39,12 @@ class TrackControllerTest {
         verify(trackService).listTracks();
     }
 
+    @Test
+    void listTracks_ShouldReturnServerError_WhenServiceFails() {
+        when(trackService.listTracks()).thenThrow(new RuntimeException("fail"));
+
+        ResponseEntity<List<Track>> response = trackController.listTracks();
+
+        assertEquals(500, response.getStatusCode().value());
+    }
 }

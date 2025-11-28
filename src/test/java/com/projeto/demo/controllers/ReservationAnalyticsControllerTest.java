@@ -66,6 +66,26 @@ class ReservationAnalyticsControllerTest {
     }
 
     @Test
+    void getSummaryByPayment_ShouldReturnForbiddenWhenNotAdmin() {
+        doReturn(false).when(controllerSpy).isAdmin();
+
+        ResponseEntity<?> response = controllerSpy.getSummaryByPayment(null, null);
+
+        assertEquals(403, response.getStatusCode().value());
+    }
+
+    @Test
+    void getSummaryByPayment_ShouldReturnServerErrorWhenServiceFails() {
+        doReturn(true).when(controllerSpy).isAdmin();
+        when(schedulingService.getSchedulingSummaryByPayment(null, null))
+                .thenThrow(new RuntimeException("boom"));
+
+        ResponseEntity<?> response = controllerSpy.getSummaryByPayment(null, null);
+
+        assertEquals(500, response.getStatusCode().value());
+    }
+
+    @Test
     void getDailySummaryRange_ShouldReturnWhenAdmin() {
         doReturn(true).when(controllerSpy).isAdmin();
         when(schedulingService.getSchedulingSummaryByDayRange(null, null)).thenReturn(List.of());
@@ -95,12 +115,34 @@ class ReservationAnalyticsControllerTest {
     }
 
     @Test
+    void getSummaryByTrack_ShouldReturnServerErrorWhenServiceFails() {
+        doReturn(true).when(controllerSpy).isAdmin();
+        when(schedulingService.getSchedulingSummaryByTrack(null, null))
+                .thenThrow(new RuntimeException("fail"));
+
+        ResponseEntity<?> response = controllerSpy.getSummaryByTrack(null, null);
+
+        assertEquals(500, response.getStatusCode().value());
+    }
+
+    @Test
     void getDailySummaryRange_ShouldReturnForbiddenWhenNotAdmin() {
         doReturn(false).when(controllerSpy).isAdmin();
 
         ResponseEntity<?> response = controllerSpy.getDailySummaryRange(null, null);
 
         assertEquals(403, response.getStatusCode().value());
+    }
+
+    @Test
+    void getDailySummaryRange_ShouldReturnServerErrorWhenServiceFails() {
+        doReturn(true).when(controllerSpy).isAdmin();
+        when(schedulingService.getSchedulingSummaryByDayRange(null, null))
+                .thenThrow(new RuntimeException("fail"));
+
+        ResponseEntity<?> response = controllerSpy.getDailySummaryRange(null, null);
+
+        assertEquals(500, response.getStatusCode().value());
     }
 
     @Test
@@ -144,6 +186,17 @@ class ReservationAnalyticsControllerTest {
     }
 
     @Test
+    void getTimeline_ShouldReturnServerErrorWhenServiceFails() {
+        doReturn(true).when(controllerSpy).isAdmin();
+        when(schedulingService.getSchedulingTimeline(null, null))
+                .thenThrow(new RuntimeException("boom"));
+
+        ResponseEntity<?> response = controllerSpy.getTimeline(null, null);
+
+        assertEquals(500, response.getStatusCode().value());
+    }
+
+    @Test
     void getCancellationStats_ShouldReturnStats() {
         doReturn(true).when(controllerSpy).isAdmin();
         var stats = new com.projeto.demo.dto.SchedulingCancellationStatsDto(1, 10L, 2L, 20);
@@ -161,5 +214,16 @@ class ReservationAnalyticsControllerTest {
         ResponseEntity<?> response = controllerSpy.getCancellationStats(null, null);
 
         assertEquals(403, response.getStatusCode().value());
+    }
+
+    @Test
+    void getCancellationStats_ShouldReturnServerErrorWhenServiceFails() {
+        doReturn(true).when(controllerSpy).isAdmin();
+        when(schedulingService.getCancellationStats(null, null))
+                .thenThrow(new RuntimeException("fail"));
+
+        ResponseEntity<?> response = controllerSpy.getCancellationStats(null, null);
+
+        assertEquals(500, response.getStatusCode().value());
     }
 }

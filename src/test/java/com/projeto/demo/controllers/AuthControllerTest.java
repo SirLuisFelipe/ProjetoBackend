@@ -57,4 +57,24 @@ class AuthControllerTest {
 
         assertEquals("token", response.getBody().getToken());
     }
+
+    @Test
+    void register_ShouldReturnServerError_WhenServiceFails() {
+        UserRegisterDto dto = new UserRegisterDto();
+        when(userService.register(dto)).thenThrow(new RuntimeException("boom"));
+
+        ResponseEntity<AuthResponseDto> response = authController.register(dto);
+
+        assertEquals(500, response.getStatusCode().value());
+    }
+
+    @Test
+    void login_ShouldReturnServerError_WhenServiceFails() {
+        UserLoginDto dto = new UserLoginDto();
+        when(userService.authenticate(dto)).thenThrow(new RuntimeException("boom"));
+
+        ResponseEntity<AuthResponseDto> response = authController.login(dto);
+
+        assertEquals(500, response.getStatusCode().value());
+    }
 }

@@ -65,6 +65,26 @@ class UserControllerTest {
     }
 
     @Test
+    void deleteById_ShouldReturnForbiddenWhenNotAdmin() {
+        doReturn(false).when(controllerSpy).isAdmin();
+
+        ResponseEntity<Void> response = controllerSpy.deleteById(10L);
+
+        assertEquals(403, response.getStatusCode().value());
+        verify(userService, never()).deleteById(anyLong());
+    }
+
+    @Test
+    void deleteById_ShouldReturnServerErrorWhenServiceFails() {
+        doReturn(true).when(controllerSpy).isAdmin();
+        doThrow(new RuntimeException("fail")).when(userService).deleteById(20L);
+
+        ResponseEntity<Void> response = controllerSpy.deleteById(20L);
+
+        assertEquals(500, response.getStatusCode().value());
+    }
+
+    @Test
     void searchUsers_ShouldReturnResult() {
         when(userService.searchUsersByName("ana")).thenReturn(List.of(new User()));
 
@@ -83,5 +103,42 @@ class UserControllerTest {
 
         assertEquals(user, response.getBody());
         verify(userService).findById(3L);
+    }
+
+    @Test
+    void update_ShouldReturnServerErrorWhenServiceFails() {
+        UserRegisterDto dto = new UserRegisterDto();
+        when(userService.update(dto)).thenThrow(new RuntimeException("fail"));
+
+        ResponseEntity<User> response = controllerSpy.update(dto);
+
+        assertEquals(500, response.getStatusCode().value());
+    }
+
+    @Test
+    void listUsers_ShouldReturnServerErrorWhenServiceFails() {
+        when(userService.listUsers()).thenThrow(new RuntimeException("fail"));
+
+        ResponseEntity<List<User>> response = controllerSpy.listUsers();
+
+        assertEquals(500, response.getStatusCode().value());
+    }
+
+    @Test
+    void searchUsers_ShouldReturnServerErrorWhenServiceFails() {
+        when(userService.searchUsersByName("ana")).thenThrow(new RuntimeException("fail"));
+
+        ResponseEntity<List<User>> response = controllerSpy.searchUsers("ana");
+
+        assertEquals(500, response.getStatusCode().value());
+    }
+
+    @Test
+    void findById_ShouldReturnServerErrorWhenServiceFails() {
+        when(userService.findById(3L)).thenThrow(new RuntimeException("fail"));
+
+        ResponseEntity<User> response = controllerSpy.findById(3L);
+
+        assertEquals(500, response.getStatusCode().value());
     }
 }

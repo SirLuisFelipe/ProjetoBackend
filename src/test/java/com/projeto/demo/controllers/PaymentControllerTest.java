@@ -38,4 +38,13 @@ class PaymentControllerTest {
         assertEquals(payments, response.getBody());
         verify(paymentService).listPayments();
     }
+
+    @Test
+    void listPayments_ShouldReturnServerError_WhenServiceFails() {
+        when(paymentService.listPayments()).thenThrow(new RuntimeException("fail"));
+
+        ResponseEntity<List<Payment>> response = paymentController.listPayments();
+
+        assertEquals(500, response.getStatusCode().value());
+    }
 }
