@@ -41,14 +41,18 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            # Nome do arquivo JAR
             JAR_NAME="demo-0.0.1-SNAPSHOT.jar"
-            # Diretório ONDE o JAR está (agora sabemos que é target/)
             JAR_DIR="/home/ubuntu/target"
+            LOG_FILE="/home/ubuntu/app.log"
             
             cd /home/ubuntu
             
-            # 1. Encontra e Mata o Processo Antigo (Usando o PATH correto agora)
+            # --- CORREÇÃO AQUI: Garante permissão de escrita no arquivo de log ---
+            echo "Ajustando permissões de log..."
+            # Muda as permissões do app.log para que o owner (ubuntu) possa escrever (rw-)
+            sudo chmod 664 $LOG_FILE || touch $LOG_FILE && sudo chmod 664 $LOG_FILE
+            
+            # 1. Encontra e Mata o Processo Antigo
             PID=$(pgrep -f "$JAR_DIR/$JAR_NAME" || true)
             if [ -n "$PID" ]; then
               echo "Processo antigo ($PID) encontrado. Enviando SIGTERM (15)..."
@@ -66,9 +70,7 @@ jobs:
             echo "--- Kill concluído. Iniciando novo JAR ---"
             
             # 2. Inicia o novo JAR
-            # O nohup precisa que o arquivo de log seja escrito em um local conhecido.
-            # O setsid executa o JAR com o PATH correto.
-            echo "Reiniciando aplicativo em $(date)" >> app.log
-            setsid nohup java -jar "$JAR_DIR/$JAR_NAME" >> app.log 2>&1 &
+            echo "Reiniciando aplicativo em $(date)" >> $LOG_FILE # Usa a variável de LOG_FILE
+            setsid nohup java -jar "$JAR_DIR/$JAR_NAME" >> $LOG_FILE 2>&1 &
             
             echo "Deploy concluído."
