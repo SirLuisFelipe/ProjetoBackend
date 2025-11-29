@@ -41,41 +41,35 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            JAR_NAME="demo-0.0.1-SNAPSHOT.jar"
+            JAR_NAME="demo-0.0.1-SNAPSHOT.jar" # Mantém este nome para pgrep e java -jar
             APP_PATH="/home/ubuntu"
             
             cd $APP_PATH
             
-            echo "--- Iniciando processo de Kill/Restart ---"
-            
-            # 1. Encontra e Mata o Processo Antigo (Garantia de Porta Liberada)
-            PID=$(pgrep -f "$JAR_NAME" || true)
-            if [ -n "$PID" ]; then
-              echo "Processo antigo ($PID) encontrado. Enviando SIGTERM (15)..."
-              # Kill suave, enviando o output de kill para /dev/null
-              sudo kill -15 "$PID" >/dev/null 2>&1 || true
-              sleep 7 # Aumentei o tempo de espera para garantir que o Spring finalize
+            # Renomeia o JAR copiado para o nome fixo que será executado (se você usou curinga)
+            # Isso garante que o nome executável seja sempre o mesmo
+            # Encontra o arquivo *.jar e o renomeia para o nome fixo
+            NEW_JAR_NAME=$(ls $APP_PATH/demo-*.jar | grep -v "$JAR_NAME" | head -1 || true)
+            if [ -n "$NEW_JAR_NAME" ]; then
+              mv $NEW_JAR_NAME $APP_PATH/$JAR_NAME
+              echo "Novo JAR renomeado para $JAR_NAME"
             fi
             
-            # 2. Confirma que a porta está livre (Mata forçadamente se necessário)
+            # Garante que o processo anterior morra e a porta seja liberada
+            PID=$(pgrep -f "$JAR_NAME" || true)
+            if [ -n "$PID" ]; then
+              sudo kill -15 "$PID" >/dev/null 2>&1 || true
+              sleep 7
+            fi
+            
             PID_CHECK=$(pgrep -f "$JAR_NAME" || true)
             if [ -n "$PID_CHECK" ]; then
-              echo "O processo ($PID_CHECK) ainda está ativo. Enviando SIGKILL (9)..."
               sudo kill -9 "$PID_CHECK" >/dev/null 2>&1 || true
               sleep 2
             fi
             
-            echo "--- Kill do processo antigo concluído. Iniciando novo JAR ---"
-            
-            # 3. Inicia o novo JAR (Comandos Essenciais)
-            # setsid: Dissocia o processo da sessão SSH (fundamental para o ambiente Lightsail/GitHub Actions)
-            # nohup: Ignora o sinal de HANGUP
-            # >> app.log: Adiciona logs em vez de sobrescrever
-            
+            # Inicia o novo JAR com setsid (persiste após o fechamento do SSH)
             echo "Reiniciando aplicativo em $(date)" >> app.log
             setsid nohup java -jar $JAR_NAME >> app.log 2>&1 &
             
-            echo "Aplicação foi iniciada em background com setsid. O deploy automático está completo."
-            
-            echo "Aplicação foi iniciada em background. Finalizando conexão SSH."
-            # Não precisamos do exit 0 explícito, mas o script encerra aqui com sucesso.
+            echo "Deploy concluído com sucesso."
