@@ -4,14 +4,14 @@ info:
   description: API for booking dates to skate on a skatepark.
   version: 1.0.0
   contact:
-    name: Luis Felipe
+    name: Luis Felipe Francisco
     email: lipalhos@gmail.com
 servers:
-  - url: http://localhost:8080/reservation
-    description: Local server
+  - url: /reservation
+    description: Ambiente atual
 
 tags:
-  - name: Auth Service
+  - name: Auth Service VAI DA BOA
     description: Endpoints for authentication and user registration
   - name: Scheduling Service
     description: Endpoints for scheduling management
