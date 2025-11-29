@@ -42,17 +42,15 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             JAR_NAME="demo-0.0.1-SNAPSHOT.jar"
-            JAR_DIR="/home/ubuntu/target"
+            # O *dir* do usuário no Lightsail é /home/ubuntu
+            JAR_DIR="/home/ubuntu/target" 
             LOG_FILE="/home/ubuntu/app.log"
             
             cd /home/ubuntu
             
-            # --- CORREÇÃO AQUI: Garante permissão de escrita no arquivo de log ---
-            echo "Ajustando permissões de log..."
-            # Muda as permissões do app.log para que o owner (ubuntu) possa escrever (rw-)
-            sudo chmod 664 $LOG_FILE || touch $LOG_FILE && sudo chmod 664 $LOG_FILE
+            # 1. Encontra e Mata o Processo Antigo (Sem alteração)
+            echo "--- Iniciando o processo de Kill/Restart ---"
             
-            # 1. Encontra e Mata o Processo Antigo
             PID=$(pgrep -f "$JAR_DIR/$JAR_NAME" || true)
             if [ -n "$PID" ]; then
               echo "Processo antigo ($PID) encontrado. Enviando SIGTERM (15)..."
@@ -70,7 +68,12 @@ jobs:
             echo "--- Kill concluído. Iniciando novo JAR ---"
             
             # 2. Inicia o novo JAR
-            echo "Reiniciando aplicativo em $(date)" >> $LOG_FILE # Usa a variável de LOG_FILE
-            setsid nohup java -jar "$JAR_DIR/$JAR_NAME" >> $LOG_FILE 2>&1 &
+            
+            # ESCREVE NO LOG USANDO SUDO TEE - OBRIGA a escrita!
+            echo "Reiniciando aplicativo em $(date)" | sudo tee -a $LOG_FILE 
+            
+            # Inicia o Java e redireciona o output (stdout e stderr) para tee com sudo
+            # O setsid ainda garante que o processo sobreviva ao fechamento do SSH.
+            setsid nohup java -jar "$JAR_DIR/$JAR_NAME" > >(sudo tee -a $LOG_FILE) 2>&1 &
             
             echo "Deploy concluído."
