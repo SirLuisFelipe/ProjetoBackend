@@ -7,7 +7,7 @@ info:
     name: Luis Felipe Francisco
     email: lipalhos@gmail.com
 servers:
-  - url: reservation
+  - url: /reservation
     description: Ambiente atual
 
 tags:
