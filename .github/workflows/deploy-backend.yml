@@ -41,11 +41,37 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            cd /home/ubuntu
-            PID=$(pgrep -f "demo-0.0.1-SNAPSHOT.jar" || true)
+            JAR_NAME="demo-0.0.1-SNAPSHOT.jar"
+            APP_PATH="/home/ubuntu"
+            
+            cd $APP_PATH
+            
+            echo "--- Iniciando o processo de Kill do JAR antigo ---"
+            
+            # 1. Encontra e Mata o Processo Antigo (SIGTERM - Encerramento suave)
+            PID=$(pgrep -f "$JAR_NAME" || true)
             if [ -n "$PID" ]; then
-              sudo kill "$PID" >/dev/null 2>&1 || true
+              echo "Processo antigo ($PID) encontrado. Enviando SIGTERM (15)..."
+              sudo kill -15 "$PID" >/dev/null 2>&1 || true
               sleep 5
             fi
-            nohup java -jar demo-0.0.1-SNAPSHOT.jar > app.log 2>&1 &
-            exit 0
+            
+            # 2. Verifica se o processo morreu e Mata forçadamente (SIGKILL - Se necessário)
+            PID_CHECK=$(pgrep -f "$JAR_NAME" || true)
+            if [ -n "$PID_CHECK" ]; then
+              echo "O processo ($PID_CHECK) ainda está ativo após 5s. Enviando SIGKILL (9)..."
+              sudo kill -9 "$PID_CHECK" >/dev/null 2>&1 || true
+              sleep 2
+            fi
+            
+            echo "--- Kill do processo antigo concluído. Iniciando novo JAR ---"
+            
+            # 3. Inicia o novo JAR
+            # setsid: Garante que o processo sobreviva ao fechar a conexão SSH (Evita status 143)
+            # nohup: Desvincula do terminal e garante que o output vá para o arquivo.
+            # >> app.log: Adiciona o novo log, em vez de apagar o antigo (Melhor para debugging).
+            echo "Reiniciando aplicativo em $(date)" >> app.log
+            setsid nohup java -jar $JAR_NAME >> app.log 2>&1 &
+            
+            echo "Aplicação foi iniciada em background. Finalizando conexão SSH."
+            # Não precisamos do exit 0 explícito, mas o script encerra aqui com sucesso.
