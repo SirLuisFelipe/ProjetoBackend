@@ -44,6 +44,8 @@ jobs:
             cd /home/ubuntu
             PID=$(pgrep -f "demo-0.0.1-SNAPSHOT.jar" || true)
             if [ -n "$PID" ]; then
-              sudo kill $PID
+              sudo kill $PID || true
+              sleep 5
             fi
             nohup java -jar demo-0.0.1-SNAPSHOT.jar > app.log 2>&1 &
+            exit 0
