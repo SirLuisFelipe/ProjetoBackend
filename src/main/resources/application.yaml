@@ -7,7 +7,7 @@ spring:
   application:
     name: "Projeto"
   datasource:
-    url: jdbc:postgresql://localhost:5432/reservation
+    url: jdbc:postgresql://99.79.51.142:5432/reservation
     username: lipalhos
     password: 172129
     driver:
@@ -17,7 +17,6 @@ spring:
   jpa:
     hibernate:
       ddl-auto: none
-
 jwt:
   secret: "tokensecret"
   expiration: 7
