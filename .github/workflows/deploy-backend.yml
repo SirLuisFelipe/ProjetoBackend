@@ -41,28 +41,28 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            JAR_NAME="demo-0.0.1-SNAPSHOT.jar"
-            APP_PATH="/home/ubuntu"
-            
-            cd $APP_PATH
-            
-            echo "--- Iniciando o processo de Kill do JAR antigo ---"
-            
-            # 1. Encontra e Mata o Processo Antigo (SIGTERM - Encerramento suave)
-            PID=$(pgrep -f "$JAR_NAME" || true)
+            cd /home/ubuntu
+
+            echo "Usuário remoto:"
+            whoami || true
+
+            echo "Listando arquivos em /home/ubuntu:"
+            ls -lh || true
+
+            PID=$(pgrep -f "demo-0.0.1-SNAPSHOT.jar" || true)
             if [ -n "$PID" ]; then
-              echo "Processo antigo ($PID) encontrado. Enviando SIGTERM (15)..."
-              sudo kill -15 "$PID" >/dev/null 2>&1 || true
+              echo "Matando processo antigo: $PID"
+              sudo kill "$PID" >/dev/null 2>&1 || true
               sleep 5
+            else
+              echo "Nenhum processo antigo encontrado"
             fi
-            
-            # 2. Verifica se o processo morreu e Mata forçadamente (SIGKILL - Se necessário)
-            PID_CHECK=$(pgrep -f "$JAR_NAME" || true)
-            if [ -n "$PID_CHECK" ]; then
-              echo "O processo ($PID_CHECK) ainda está ativo após 5s. Enviando SIGKILL (9)..."
-              sudo kill -9 "$PID_CHECK" >/dev/null 2>&1 || true
-              sleep 2
-            fi
+
+            echo "Iniciando nova versão..."
+            nohup /usr/bin/java -jar /home/ubuntu/demo-0.0.1-SNAPSHOT.jar > /home/ubuntu/app.log 2>&1 &
+
+            echo "Backend iniciado (com nohup)."
+            exit 0
             
             echo "--- Kill do processo antigo concluído. Iniciando novo JAR ---"
             
