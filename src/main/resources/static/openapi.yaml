@@ -4,7 +4,7 @@ info:
   description: API for booking dates to skate on a skatepark.
   version: 1.0.0
   contact:
-    name: Luis Felipe Francisco / Lipalhos
+    name: Luis Felipe Francisco
     email: lipalhos@gmail.com
 servers:
   - url: /reservation
