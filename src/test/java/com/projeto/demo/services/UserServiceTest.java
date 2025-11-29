@@ -67,7 +67,7 @@ class UserServiceTest {
         User user = new User();
         user.setEncodedPassword("encodedPassword");
 
-        when(userRepository.findByEmail(loginDto.getEmail())).thenReturn(Optional.of(user));
+        when(userRepository.findByEmailIgnoreCase(loginDto.getEmail())).thenReturn(Optional.of(user));
         when(passwordEncoder.matches(loginDto.getPassword(), user.getEncodedPassword())).thenReturn(false);
 
         assertThrows(InvalidCredentialsException.class, () -> userService.authenticate(loginDto));
@@ -112,14 +112,14 @@ class UserServiceTest {
     @Test
     void findByEmail_ShouldReturnUser() {
         User user = new User();
-        when(userRepository.findByEmail("test")).thenReturn(Optional.of(user));
+        when(userRepository.findByEmailIgnoreCase("test")).thenReturn(Optional.of(user));
 
         assertEquals(user, userService.findByEmail("test"));
     }
 
     @Test
     void findByEmail_ShouldThrow_WhenNotFound() {
-        when(userRepository.findByEmail("test")).thenReturn(Optional.empty());
+        when(userRepository.findByEmailIgnoreCase("test")).thenReturn(Optional.empty());
 
         assertThrows(UserNotFoundException.class, () -> userService.findByEmail("test"));
     }

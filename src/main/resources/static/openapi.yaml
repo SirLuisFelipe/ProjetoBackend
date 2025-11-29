@@ -1,26 +1,30 @@
 openapi: 3.0.0
 info:
-  title: Project API
-  description: API for booking dates to skate on a skatepark.
+  title: API do Projeto
+  description: API para agendamento de horarios na pista de skate.
   version: 1.0.0
   contact:
     name: Luis Felipe Francisco
     email: lipalhos@gmail.com
 servers:
-  - url: /reservation
+  - url: reservation
     description: Ambiente atual
 
 tags:
-  - name: Auth Service VAI DA BOA
-    description: Endpoints for authentication and user registration
+  - name: Auth Service
+    description: Endpoints para autenticacao e cadastro de usuarios
   - name: Scheduling Service
-    description: Endpoints for scheduling management
+    description: Endpoints para gestao de agendamentos
   - name: Scheduling Analytics
-    description: Aggregated scheduling data for dashboards
-  - name: Track Service
-    description: Endpoints for track management
+    description: Dados agregados de agendamentos para dashboards
   - name: User Service
-    description: Endpoints for user management
+    description: Endpoints para gestao de usuarios
+  - name: Track Service
+    description: Endpoints para gestao de pistas
+  - name: Payment Service
+    description: Endpoints para gestao de pagamento
+    
+
 
 components:
   securitySchemes:
@@ -139,8 +143,11 @@ components:
         turno:
           $ref: '#/components/schemas/Turno'
         checkinStatus:
-          $ref: '#/components/schemas/CheckinStatus'
-          description: Campo opcional usado em respostas e pode ser enviado em atualizações para alterar o status (regras de negócio se aplicam).
+          allOf:
+            - $ref: '#/components/schemas/CheckinStatus'
+          description: >
+            Campo opcional usado em respostas e pode ser enviado em atualizacoes para alterar o status.
+            Regras: administradores so podem definir CANCELADO, REALIZADO ou NAO_REALIZADO; usuarios comuns so podem enviar CANCELADO ou REALIZADO (apenas no dia agendado). Se nao for alterar o status, omita este campo.
 
     Scheduling:
       type: object
@@ -252,7 +259,7 @@ paths:
     post:
       tags:
         - Auth Service
-      summary: Registers a new user
+      summary: Registra um novo usuario
       operationId: registerUser
       requestBody:
         required: true
@@ -262,19 +269,19 @@ paths:
               $ref: '#/components/schemas/UserRegisterDto'
       responses:
         '200':
-          description: User successfully registered
+          description: Usuario registrado com sucesso
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/AuthResponseDto'
         '500':
-          description: Server error
+          description: Erro interno no servidor
 
   /auth/login:
     post:
       tags:
         - Auth Service
-      summary: Authenticates a user
+      summary: Autentica um usuario
       operationId: loginUser
       requestBody:
         required: true
@@ -284,24 +291,27 @@ paths:
               $ref: '#/components/schemas/UserLoginDto'
       responses:
         '200':
-          description: Authentication successful
+          description: Autenticacao realizada com sucesso
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/AuthResponseDto'
         '500':
-          description: Server error
+          description: Erro interno no servidor
 
 
   /scheduling/:
     post:
       tags:
         - Scheduling Service
-      summary: Creates a new schedule (date + turno)
+      summary: Cria um novo agendamento (data + turno)
       operationId: createScheduling
       security:
         - bearerAuth: [ ]
       requestBody:
+        description: >
+          Para atualizar o check-in, inclua o campo `checkinStatus` seguindo as regras:
+          administradores podem enviar CANCELADO, REALIZADO ou NAO_REALIZADO; usuarios comuns so podem enviar CANCELADO ou REALIZADO (apenas no dia agendado). Se nao for alterar o status, nao envie o campo.
         required: true
         content:
           application/json:
@@ -313,25 +323,28 @@ paths:
               paymentId: 3 # ID do pagamento associado (pode ser null)
               scheduledDate: "2026-01-01" # Data do agendamento
               turno: "VESPERTINO" # OPCOES: MATUTINO, VESPERTINO, NOTURNO
-              "checkinStatus": "PENDENTE" #VALOR PADRAO PARA NOVOS AGENDAMENTOS
+              # Para alterar checkinStatus inclua o campo seguindo as regras descritas no schema (admins: CANCELADO/REALIZADO/NAO_REALIZADO; usuarios: CANCELADO ou REALIZADO no dia agendado).
       responses:
         '200':
-          description: Schedule successfully created
+          description: Agendamento criado com sucesso
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Scheduling'
         '500':
-          description: Server error
+          description: Erro interno no servidor
 
     put:
       tags:
         - Scheduling Service
-      summary: Updates an existing schedule
+      summary: Atualiza um agendamento existente
       operationId: updateScheduling
       security:
         - bearerAuth: [ ]
       requestBody:
+        description: >
+          Inclua `checkinStatus` somente para alterar o status e respeitando as mesmas regras do POST:
+          admins podem definir CANCELADO, REALIZADO ou NAO_REALIZADO; usuarios podem enviar CANCELADO ou REALIZADO (no dia agendado). Para alteracoes de data/pista/turno, omita o campo.
         required: true
         content:
           application/json:
@@ -344,27 +357,27 @@ paths:
               paymentId: null
               scheduledDate: "2025-11-11"
               turno: "MATUTINO"
-              "checkinStatus": "PENDENTE"
+              # Inclua o campo checkinStatus apenas se for alterar o status e respeite as regras de permissao (admins: CANCELADO/REALIZADO/NAO_REALIZADO; usuarios: CANCELADO ou REALIZADO no dia).
       responses:
         '200':
-          description: Schedule successfully updated
+          description: Agendamento atualizado com sucesso
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Scheduling'
         '500':
-          description: Server error
+          description: Erro interno no servidor
 
     get:
       tags:
         - Scheduling Service
-      summary: Lists all schedules
+      summary: Lista todos os agendamentos
       operationId: listSchedulings
       security:
         - bearerAuth: [ ]
       responses:
         '200':
-          description: Schedule list
+          description: Lista de agendamentos
           content:
             application/json:
               schema:
@@ -372,13 +385,13 @@ paths:
                 items:
                   $ref: '#/components/schemas/Scheduling'
         '500':
-          description: Server error
+          description: Erro interno no servidor
 
   /scheduling/{id}:
     delete:
       tags:
         - Scheduling Service
-      summary: Deletes a schedule by ID
+      summary: Remove um agendamento pelo ID
       operationId: deleteSchedulingById
       security:
         - bearerAuth: []
@@ -390,15 +403,15 @@ paths:
             type: integer
       responses:
         '200':
-          description: Schedule successfully deleted
+          description: Agendamento removido com sucesso
         '500':
-          description: Server error
+          description: Erro interno no servidor
 
   /scheduling/analytics/day:
     get:
       tags:
         - Scheduling Analytics
-      summary: Retorna a quantidade de agendamentos por turno em um dia específico
+      summary: Retorna a quantidade de agendamentos por turno em um dia especifico
       operationId: getSchedulingSummaryByDay
       security:
         - bearerAuth: []
@@ -417,19 +430,19 @@ paths:
               schema:
                 $ref: '#/components/schemas/SchedulingDaySummary'
         '500':
-          description: Server error
+          description: Erro interno no servidor
 
   /payment/:
     get:
       tags:
         - Payment Service
-      summary: Lists all payments
+      summary: Lista todas as formas de pagamento
       operationId: listPayments
       security:
         - bearerAuth: []
       responses:
         '200':
-          description: Payment list
+          description: Lista de pagamentos
           content:
             application/json:
               schema:
@@ -437,7 +450,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/Payment'
         '500':
-          description: Server error
+          description: Erro interno no servidor
 
   /scheduling/analytics/by-track:
     get:
@@ -470,7 +483,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/SchedulingTrackSummary'
         '500':
-          description: Server error
+          description: Erro interno no servidor
 
   /scheduling/analytics/by-payment:
     get:
@@ -503,13 +516,13 @@ paths:
                 items:
                   $ref: '#/components/schemas/SchedulingPaymentSummary'
         '500':
-          description: Server error
+          description: Erro interno no servidor
 
   /scheduling/analytics/by-user:
     get:
       tags:
         - Scheduling Analytics
-      summary: Retorna o ranking de usuários por quantidade de agendamentos
+      summary: Retorna o ranking de usuarios por quantidade de agendamentos
       operationId: getSchedulingSummaryByUser
       security:
         - bearerAuth: []
@@ -534,7 +547,7 @@ paths:
             format: date
       responses:
         '200':
-          description: Totais por usuário retornados com sucesso
+          description: Totais por usuario retornados com sucesso
           content:
             application/json:
               schema:
@@ -542,13 +555,13 @@ paths:
                 items:
                   $ref: '#/components/schemas/SchedulingUserSummary'
         '500':
-          description: Server error
+          description: Erro interno no servidor
 
   /scheduling/analytics/timeline:
     get:
       tags:
         - Scheduling Analytics
-      summary: Retorna a quantidade de agendamentos por mês em um período
+      summary: Retorna a quantidade de agendamentos por mes em um periodo
       operationId: getSchedulingTimeline
       security:
         - bearerAuth: []
@@ -575,13 +588,13 @@ paths:
                 items:
                   $ref: '#/components/schemas/SchedulingTimelinePoint'
         '500':
-          description: Server error
+          description: Erro interno no servidor
 
   /scheduling/analytics/cancellations:
     get:
       tags:
         - Scheduling Analytics
-      summary: Retorna o percentual de cancelamentos no período informado
+      summary: Retorna o percentual de cancelamentos no periodo informado
       operationId: getSchedulingCancellationStats
       security:
         - bearerAuth: []
@@ -606,13 +619,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/SchedulingCancellationStats'
         '500':
-          description: Server error
+          description: Erro interno no servidor
 
   /scheduling/analytics/day-range:
     get:
       tags:
         - Scheduling Analytics
-      summary: Retorna o resumo diário por turno em um intervalo
+      summary: Retorna o resumo diario por turno em um intervalo
       operationId: getSchedulingSummaryByDayRange
       security:
         - bearerAuth: []
@@ -631,7 +644,7 @@ paths:
             format: date
       responses:
         '200':
-          description: Resumo diário retornado com sucesso
+          description: Resumo diario retornado com sucesso
           content:
             application/json:
               schema:
@@ -639,19 +652,19 @@ paths:
                 items:
                   $ref: '#/components/schemas/SchedulingDaySummary'
         '500':
-          description: Server error
+          description: Erro interno no servidor
 
   /track/:
     get:
       tags:
         - Track Service
-      summary: Lists all tracks
+      summary: Lista todas as pistas
       operationId: listTracks
       security:
         - bearerAuth: []
       responses:
         '200':
-          description: Track list
+          description: Lista de pistas
           content:
             application/json:
               schema:
@@ -659,13 +672,13 @@ paths:
                 items:
                   $ref: '#/components/schemas/Track'
         '500':
-          description: Server error
+          description: Erro interno no servidor
 
   /user/:
     put:
       tags:
         - User Service
-      summary: Updates a user
+      summary: Atualiza um usuario
       operationId: updateUser
       security:
         - bearerAuth: []
@@ -677,19 +690,19 @@ paths:
               $ref: '#/components/schemas/UserEditDto'
       responses:
         '200':
-          description: User successfully updated
+          description: Usuario atualizado com sucesso
         '500':
-          description: Server error
+          description: Erro interno no servidor
     get:
       tags:
         - User Service
-      summary: Lists all users
+      summary: Lista todos os usuarios
       operationId: listUsers
       security:
         - bearerAuth: []
       responses:
         '200':
-          description: User list
+          description: Lista de usuarios
           content:
             application/json:
               schema:
@@ -697,13 +710,13 @@ paths:
                 items:
                   $ref: '#/components/schemas/User'
         '500':
-          description: Server error
+          description: Erro interno no servidor
 
   /user/search:
     get:
       tags:
         - User Service
-      summary: Retrieves a user by Name
+      summary: Busca usuarios pelo nome
       operationId: getUserByName
       security:
         - bearerAuth: [ ]
@@ -721,14 +734,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/User'
         '500':
-          description: Server error
+          description: Erro interno no servidor
 
 
   /user/id/{id}:
     get:
       tags:
         - User Service
-      summary: Retrieves a user by ID
+      summary: Busca um usuario pelo ID
       operationId: getUserById
       security:
         - bearerAuth: []
@@ -746,11 +759,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/User'
         '500':
-          description: Server error
+          description: Erro interno no servidor
     delete:
       tags:
         - User Service
-      summary: Deletes a user by ID
+      summary: Remove um usuario pelo ID
       operationId: deleteUserById
       security:
         - bearerAuth: [ ]
@@ -762,7 +775,7 @@ paths:
             type: integer
       responses:
         '200':
-          description: User successfully deleted
+          description: Usuario removido com sucesso
         '500':
-          description: Server error
+          description: Erro interno no servidor
 

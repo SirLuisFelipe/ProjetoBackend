@@ -48,7 +48,7 @@ jobs:
             
             cd /home/ubuntu
             
-            # 1. Encontra e Mata o Processo Antigo (Sem alteração)
+            # 1. Encontra e Mata o Processo Antigo
             echo "--- Iniciando o processo de Kill/Restart ---"
             
             PID=$(pgrep -f "$JAR_DIR/$JAR_NAME" || true)
