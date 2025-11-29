@@ -7,7 +7,7 @@ spring:
   application:
     name: "Projeto"
   datasource:
-    url: jdbc:postgresql://99.79.51.142:5432/reservation
+    url: jdbc:postgresql://99.79.51.142:8080/reservation
     username: lipalhos
     password: 172129
     driver:
