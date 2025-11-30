@@ -8,8 +8,8 @@ spring:
     name: "Projeto"
   datasource:
     url: jdbc:postgresql://localhost:5432/reservation
-    username: postgres
-    password: postgres
+    username: lipalhos
+    password: 172129
     driver:
       class: org.hibernate.dialect.PostgreSQL10Dialect
   liquibase:
