@@ -7,9 +7,9 @@ spring:
   application:
     name: "Projeto"
   datasource:
-    url: jdbc:postgresql://99.79.51.142:5432/reservation
-    username: lipalhos
-    password: 172129
+    url: jdbc:postgresql://localhost:5432/reservation
+    username: postgres
+    password: postgres
     driver:
       class: org.hibernate.dialect.PostgreSQL10Dialect
   liquibase:
