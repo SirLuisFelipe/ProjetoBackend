@@ -7,8 +7,8 @@ info:
     name: Luis Felipe Francisco
     email: lipalhos@gmail.com
 servers:
-  - url: /reservation
-    description: Ambiente atual
+  - url: http://99.79.51.142:8080/reservation
+    description: Local server
 
 tags:
   - name: Auth Service

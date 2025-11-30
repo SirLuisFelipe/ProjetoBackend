@@ -1,5 +1,7 @@
 server:
   port: 8080
+  servlet:
+    context-path: /reservation
 
 spring:
   application:
@@ -15,6 +17,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: none
+
 jwt:
   secret: "tokensecret"
   expiration: 7
