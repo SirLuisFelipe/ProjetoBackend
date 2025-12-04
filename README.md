@@ -1,3 +1,16 @@
+## Aplicação disponivel em:
+https://colanapista.vercel.app/pages/login.html
+
+## Usuarios para teste: 
+
+#### Admin
+Email: Professor@gmail.com <br>
+Senha: Professor@2025
+
+#### Usuario
+Email: Checkin@gmail.com <br>
+Senha: Checkin@123
+
 ## Roteiro para Avaliadores (professores)
 Use o passo a passo abaixo como guia ao testar o frontend durante as avaliacoes da disciplina. Ele cobre as funcionalidades principais para os perfis de usuario padrao e administrador.
 
